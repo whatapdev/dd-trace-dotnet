@@ -1,4 +1,23 @@
-version: '3'
+version: '3.4'
+
+x-integration-test-shared: &integration-test-shared
+  environment:
+  - MONGO_HOST=mongo
+  - SERVICESTACK_REDIS_HOST=servicestackredis:6379
+  - STACKEXCHANGE_REDIS_HOST=stackexchangeredis:6379
+  - ELASTICSEARCH6_HOST=elasticsearch6:9200
+  - ELASTICSEARCH5_HOST=elasticsearch5:9200
+  - SQLSERVER_CONNECTION_STRING=Server=sqlserver;Database=BlogDatabase;User=sa;Password=Strong!Passw0rd
+  - POSTGRES_HOST=postgres
+  depends_on:
+  - servicestackredis
+  - stackexchangeredis
+  - elasticsearch6
+  - elasticsearch5
+  - sqlserver
+  - mongo
+  - postgres
+
 services:
   servicestackredis:
     image: redis:4-alpine
@@ -168,6 +187,16 @@ services:
     depends_on:
     - mongo
 
+  Datadog.Trace.ClrProfiler.IntegrationTests.StartDependencies:
+    build:
+      context: ./
+      dockerfile: ./docker/dotnet.dockerfile
+    image: datadog-dotnet
+    command: /project/docker/Datadog.Trace.ClrProfiler.IntegrationTests.StartDependencies.sh
+    volumes:
+    - ./:/project
+    <<: *integration-test-shared
+
   Datadog.Trace.ClrProfiler.IntegrationTests:
     build:
       context: ./
@@ -176,19 +205,4 @@ services:
     command: /project/docker/Datadog.Trace.ClrProfiler.IntegrationTests.sh
     volumes:
     - ./:/project
-    environment:
-    - MONGO_HOST=mongo
-    - SERVICESTACK_REDIS_HOST=servicestackredis:6379
-    - STACKEXCHANGE_REDIS_HOST=stackexchangeredis:6379
-    - ELASTICSEARCH6_HOST=elasticsearch6:9200
-    - ELASTICSEARCH5_HOST=elasticsearch5:9200
-    - SQLSERVER_CONNECTION_STRING=Server=sqlserver;Database=BlogDatabase;User=sa;Password=Strong!Passw0rd
-    - POSTGRES_HOST=postgres
-    depends_on:
-    - servicestackredis
-    - stackexchangeredis
-    - elasticsearch6
-    - elasticsearch5
-    - sqlserver
-    - mongo
-    - postgres
+    <<: *integration-test-shared
