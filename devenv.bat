@@ -48,7 +48,7 @@ SET CORECLR_PROFILER={846F5F1C-F9AE-4B07-969E-05C26BC060D8}
 SET CORECLR_PROFILER_PATH=%~dp0\src\Datadog.Trace.ClrProfiler.Native\bin\%profiler_configuration%\%profiler_platform%\Datadog.Trace.ClrProfiler.Native.dll
 
 rem Don't attach the profiler to these processes
-SET DD_PROFILER_EXCLUDE_PROCESSES=devenv.exe;Microsoft.ServiceHub.Controller.exe;ServiceHub.Host.CLR.exe;sqlservr.exe;VBCSCompiler.exe;iisexpresstray.exe;msvsmon.exe
+SET DD_PROFILER_EXCLUDE_PROCESSES=devenv.exe;Microsoft.ServiceHub.Controller.exe;ServiceHub.Host.CLR.exe;sqlservr.exe;ServiceHub.Host.CLR.x86.exe;VBCSCompiler.exe;iisexpresstray.exe;msvsmon.exe;MSBuild.exe;Microsoft.VisualStudio.Web.Host.exe;PerfWatson2.exe;ServiceHub.RoslynCodeAnalysisService32.exe;ServiceHub.SettingsHost.exe;ServiceHub.VSDetouredHost.exe;ServiceHub.ThreadedWaitDialog.exe;Microsoft.Alm.Shared.Remoting.RemoteContainer.dll;ServiceHub.IdentityHost.exe
 
 rem Set location of integration definitions
 SET DD_INTEGRATIONS=%~dp0\integrations.json;%~dp0\test-integrations.json
