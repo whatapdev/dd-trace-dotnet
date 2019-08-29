@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -14,7 +14,7 @@ namespace App4
         void Application_Start(object sender, EventArgs e)
         {
             // Code that runs on application startup
-            RouteConfig.RegisterRoutes(RouteTable.Routes);
+            // RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
         }
     }

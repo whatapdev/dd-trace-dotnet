@@ -15,7 +15,8 @@
     <AssemblyName>App1</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <UseIISExpress>true</UseIISExpress>
-    <Use64BitIISExpress />
+    <Use64BitIISExpress>
+    </Use64BitIISExpress>
     <IISExpressSSLPort>44362</IISExpressSSLPort>
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
@@ -121,7 +122,6 @@
     <Compile Include="About.aspx.designer.cs">
       <DependentUpon>About.aspx</DependentUpon>
     </Compile>
-    <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Contact.aspx.cs">
       <DependentUpon>Contact.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -173,6 +173,9 @@
     </PackageReference>
     <PackageReference Include="bootstrap">
       <Version>3.4.1</Version>
+    </PackageReference>
+    <PackageReference Include="Datadog.Trace.ClrProfiler.Managed">
+      <Version>1.6.2</Version>
     </PackageReference>
     <PackageReference Include="jQuery">
       <Version>3.3.1</Version>
