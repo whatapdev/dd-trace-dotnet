@@ -67,35 +67,18 @@ jobs:
   steps:
   - template: templates/steps/build-managed.yml
 
-  - task: DotNetCoreCLI@2
-    displayName: dotnet publish Datadog.Trace.ClrProfiler.Managed --framework net45
-    inputs:
-      command: publish
-      publishWebProjects: false
-      modifyOutputPath: false
-      zipAfterPublish: false
-      projects: src/Datadog.Trace.ClrProfiler.Managed/Datadog.Trace.ClrProfiler.Managed.csproj
-      arguments: --configuration $(buildConfiguration) --framework net45 --output $(publishOutput)/net45
+  - template: templates/steps/publish-clrprofiler-managed.yml
+    parameters:
+      framework: 'net45'
 
-  - task: DotNetCoreCLI@2
-    displayName: dotnet publish Datadog.Trace.ClrProfiler.Managed --framework net461
-    inputs:
-      command: publish
-      publishWebProjects: false
-      modifyOutputPath: false
-      zipAfterPublish: false
-      projects: src/Datadog.Trace.ClrProfiler.Managed/Datadog.Trace.ClrProfiler.Managed.csproj
-      arguments: --configuration $(buildConfiguration) --framework net461 --output $(publishOutput)/net461
+  - template: templates/steps/publish-clrprofiler-managed.yml
+    parameters:
+      framework: 'net461'
 
-  - task: DotNetCoreCLI@2
-    displayName: dotnet publish Datadog.Trace.ClrProfiler.Managed --framework netstandard2.0
-    inputs:
-      command: publish
-      publishWebProjects: false
-      modifyOutputPath: false
-      zipAfterPublish: false
-      projects: src/Datadog.Trace.ClrProfiler.Managed/Datadog.Trace.ClrProfiler.Managed.csproj
-      arguments: --configuration $(buildConfiguration) --framework netstandard2.0 --output $(publishOutput)/netstandard2.0
+  - template: templates/steps/publish-clrprofiler-managed.yml
+    parameters:
+      framework: 'netstandard2.0'
+
 
   - task: NuGetCommand@2
     displayName: nuget restore native

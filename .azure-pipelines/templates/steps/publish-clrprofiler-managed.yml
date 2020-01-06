@@ -1,0 +1,14 @@
+parameters:
+  - name: framework
+    type: string
+
+steps:
+  - task: DotNetCoreCLI@2
+    displayName: dotnet publish Datadog.Trace.ClrProfiler.Managed --framework ${{ parameters.framework }}
+    inputs:
+      command: publish
+      publishWebProjects: false
+      modifyOutputPath: false
+      zipAfterPublish: false
+      projects: src/Datadog.Trace.ClrProfiler.Managed/Datadog.Trace.ClrProfiler.Managed.csproj
+      arguments: --configuration $(buildConfiguration) --framework ${{ parameters.framework }} --output $(publishOutput)/${{ parameters.framework }}
