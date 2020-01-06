@@ -10,43 +10,36 @@
   "profiles": {
     "IIS Express": {
       "commandName": "IISExpress",
-      "launchBrowser": false,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-
-        "COR_ENABLE_PROFILING": "1",
-        "COR_PROFILER": "{846F5F1C-F9AE-4B07-969E-05C26BC060D8}",
-        "COR_PROFILER_PATH": "$(ProjectDir)$(OutputPath)profiler-lib\\Datadog.Trace.ClrProfiler.Native.dll",
-
-        "CORECLR_ENABLE_PROFILING": "1",
-        "CORECLR_PROFILER": "{846F5F1C-F9AE-4B07-969E-05C26BC060D8}",
-        "CORECLR_PROFILER_PATH": "$(ProjectDir)$(OutputPath)profiler-lib\\Datadog.Trace.ClrProfiler.Native.dll",
-
         "DD_DOTNET_TRACER_HOME": "$(ProjectDir)$(OutputPath)profiler-lib",
-        "DD_INTEGRATIONS": "$(ProjectDir)$(OutputPath)profiler-lib\\integrations.json"
+        "COR_ENABLE_PROFILING": "0",
+        "CORECLR_ENABLE_PROFILING": "0",
+        "COR_PROFILER_PATH": "$(ProjectDir)$(OutputPath)profiler-lib\\Datadog.Trace.ClrProfiler.Native.dll",
+        "CORECLR_PROFILER": "{846F5F1C-F9AE-4B07-969E-05C26BC060D8}",
+        "DD_INTEGRATIONS": "$(ProjectDir)$(OutputPath)profiler-lib\\integrations.json",
+        "CORECLR_PROFILER_PATH": "$(ProjectDir)$(OutputPath)profiler-lib\\Datadog.Trace.ClrProfiler.Native.dll",
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "COR_PROFILER": "{846F5F1C-F9AE-4B07-969E-05C26BC060D8}"
       },
-      "use64Bit": true,
-      "nativeDebugging": true
+      "nativeDebugging": true,
+      "use64Bit": true
     },
     "Samples.AspNetCoreMvc2": {
-      "commandName": "Project",
-      "launchBrowser": false,
+      "commandName": "IISExpress",
+      "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-
-        "COR_ENABLE_PROFILING": "1",
-        "COR_PROFILER": "{846F5F1C-F9AE-4B07-969E-05C26BC060D8}",
-        "COR_PROFILER_PATH": "$(ProjectDir)$(OutputPath)profiler-lib\\Datadog.Trace.ClrProfiler.Native.dll",
-
-        "CORECLR_ENABLE_PROFILING": "1",
-        "CORECLR_PROFILER": "{846F5F1C-F9AE-4B07-969E-05C26BC060D8}",
-        "CORECLR_PROFILER_PATH": "$(ProjectDir)$(OutputPath)profiler-lib\\Datadog.Trace.ClrProfiler.Native.dll",
-
         "DD_DOTNET_TRACER_HOME": "$(ProjectDir)$(OutputPath)profiler-lib",
-        "DD_INTEGRATIONS": "$(ProjectDir)$(OutputPath)profiler-lib\\integrations.json"
+        "COR_ENABLE_PROFILING": "0",
+        "CORECLR_ENABLE_PROFILING": "0",
+        "COR_PROFILER_PATH": "$(ProjectDir)$(OutputPath)profiler-lib\\Datadog.Trace.ClrProfiler.Native.dll",
+        "CORECLR_PROFILER": "{846F5F1C-F9AE-4B07-969E-05C26BC060D8}",
+        "DD_INTEGRATIONS": "$(ProjectDir)$(OutputPath)profiler-lib\\integrations.json",
+        "CORECLR_PROFILER_PATH": "$(ProjectDir)$(OutputPath)profiler-lib\\Datadog.Trace.ClrProfiler.Native.dll",
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "COR_PROFILER": "{846F5F1C-F9AE-4B07-969E-05C26BC060D8}"
       },
-      "applicationUrl": "http://localhost:54566/",
-      "nativeDebugging": true
+      "nativeDebugging": false,
+      "applicationUrl": "http://localhost:54566/"
     }
   }
 }
