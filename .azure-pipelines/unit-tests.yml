@@ -27,38 +27,26 @@ jobs:
     vmImage: $(imageName)
 
   steps:
-  - task: UseDotNet@2
-    displayName: install dotnet core 2.1 sdk
-    inputs:
-      packageType: sdk
-      version: $(dotnetCore21SdkVersion)
-
-  - task: UseDotNet@2
-    displayName: install dotnet core 3.0 sdk
-    inputs:
-      packageType: sdk
-      version: $(dotnetCoreSdkVersion)
+  - template: templates/steps/build-managed.yml
 
   - task: DotNetCoreCLI@2
-    displayName: dotnet restore
+    displayName: dotnet restore unit-tests
     inputs:
       command: restore
       projects: |
-        src/**/*.csproj
         test/**/*.Tests.csproj
       vstsFeed: $(packageFeed)
 
   - task: DotNetCoreCLI@2
-    displayName: dotnet build
+    displayName: dotnet build unit-tests
     inputs:
       command: build
       configuration: $(buildConfiguration)
       projects: |
-        src/**/*.csproj
         test/**/*.Tests.csproj
 
   - task: DotNetCoreCLI@2
-    displayName: dotnet test
+    displayName: dotnet test unit-tests
     inputs:
       command: test
       configuration: $(buildConfiguration)

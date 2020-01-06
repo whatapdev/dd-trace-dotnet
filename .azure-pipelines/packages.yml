@@ -33,11 +33,7 @@ jobs:
     inputs:
       preferBundledVersion: false
 
-  - task: UseDotNet@2
-    displayName: install dotnet core sdk
-    inputs:
-      packageType: sdk
-      version: $(dotnetCoreSdkVersion)
+  - template: templates/steps/build-managed.yml
 
   - task: NuGetCommand@2
     displayName: nuget restore native
@@ -45,20 +41,6 @@ jobs:
       restoreSolution: Datadog.Trace.Native.sln
       vstsFeed: $(packageFeed)
       verbosityRestore: Normal
-
-  - task: DotNetCoreCLI@2
-    displayName: dotnet restore
-    inputs:
-      command: restore
-      projects: src/**/*.csproj
-      vstsFeed: $(packageFeed)
-
-  - task: DotNetCoreCLI@2
-    displayName: dotnet build
-    inputs:
-      command: build
-      projects: src/**/*.csproj
-      arguments: --configuration $(buildConfiguration)
 
   - task: DotNetCoreCLI@2
     displayName: dotnet pack
@@ -99,24 +81,7 @@ jobs:
     vmImage: ubuntu-16.04
 
   steps:
-  - task: UseDotNet@2
-    displayName: install dotnet core sdk
-    inputs:
-      version: $(dotnetCoreSdkVersion)
-
-  - task: DotNetCoreCLI@2
-    displayName: dotnet restore
-    inputs:
-      command: restore
-      projects: src/**/*.csproj
-      vstsFeed: $(packageFeed)
-
-  - task: DotNetCoreCLI@2
-    displayName: dotnet build
-    inputs:
-      command: build
-      projects: src/**/*.csproj
-      arguments: --configuration $(buildConfiguration)
+  - template: templates/steps/build-managed.yml
 
   - task: DotNetCoreCLI@2
     displayName: dotnet publish Datadog.Trace.ClrProfiler.Managed --framework netstandard2.0
