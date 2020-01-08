@@ -200,6 +200,30 @@ services:
     depends_on:
     - mongo
 
+  Alpine.3.9:
+    build:
+      context: ./
+      dockerfile: ./docker/dotnet.alpine.3.9.dockerfile
+    image: datadog-dotnet-alpine39
+    command: bash -c "/project/docker/with-profiler-logs.bash /project/docker/with-profiler.bash dotnet /project/samples/Samples.HttpMessageHandler/bin/${buildConfiguration}/${publishTargetFramework}/publish/Samples.HttpMessageHandler.dll"
+    volumes:
+    - ./:/project
+
+  Alpine.3.10:
+    build:
+      context: ./
+      dockerfile: ./docker/dotnet.alpine.3.10.dockerfile
+    image: datadog-dotnet-alpine310
+    command: bash -c "/project/docker/with-profiler-logs.bash /project/docker/with-profiler.bash dotnet /project/samples/Samples.HttpMessageHandler/bin/${buildConfiguration}/${publishTargetFramework}/publish/Samples.HttpMessageHandler.dll"
+    volumes:
+    - ./:/project
+
+  debug.alpine.3.10:
+    container_name: myapp
+    build:
+      context: ./
+      dockerfile: ./docker/dotnet.debug.alpine.3.10.dockerfile
+
   IntegrationTests:
     build:
       context: ./
