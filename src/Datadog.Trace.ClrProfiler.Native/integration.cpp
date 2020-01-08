@@ -4,11 +4,13 @@
 #ifdef _WIN32
 #include <regex>
 #else
+#include <regex>
 #include <re2/re2.h>
 #endif
 #include <sstream>
 
 #include "util.h"
+#include "logging.h"
 
 namespace trace {
 
@@ -43,26 +45,42 @@ Version GetVersionFromAssemblyReferenceString(const WSTRING& str) {
   unsigned short build = 0;
   unsigned short revision = 0;
 
-#ifdef _WIN32
+  std::string cross_os_string = ToString(str);
+  std::size_t current_sz;
+  std::vector<int> vector_match;
+  std::size_t pos_version_start = cross_os_string.find("Version=");
+  if (pos_version_start != std::string::npos) {
+    pos_version_start += 8;
+    std::size_t pos_version_end = cross_os_string.find(",", pos_version_start);
+    std::string substring;
+    
+    if (pos_version_end == std::string::npos) {
+      substring = cross_os_string.substr(pos_version_start);
+    } else {
+      substring = cross_os_string.substr(pos_version_start, pos_version_end - pos_version_start);
+    }
 
-  static auto re =
-      std::wregex("Version=([0-9]+)\\.([0-9]+)\\.([0-9]+)\\.([0-9]+)"_W);
+    size_t next_position;
+    for (int i = 0; i < 4; i++) {
+      try {
+        vector_match.push_back(std::stoi(substring, &next_position));
 
-  std::wsmatch match;
-  if (std::regex_search(str, match, re) && match.size() == 5) {
-    WSTRINGSTREAM(match.str(1)) >> major;
-    WSTRINGSTREAM(match.str(2)) >> minor;
-    WSTRINGSTREAM(match.str(3)) >> build;
-    WSTRINGSTREAM(match.str(4)) >> revision;
+        if (next_position == std::string::npos || next_position == substring.length() || substring[next_position] != '.'_W) {
+          break;
+        }
+        substring = substring.substr(next_position + 1);
+      } catch (const std::exception& ex) {
+        throw ex;
+      }
+    }
+
+    if (vector_match.size() == 4) {
+      major = vector_match[0];
+      minor = vector_match[1];
+      build = vector_match[2];
+      revision = vector_match[3];
+    }
   }
-
-#else
-
-  static re2::RE2 re("Version=([0-9]+)\\.([0-9]+)\\.([0-9]+)\\.([0-9]+)",
-                     RE2::Quiet);
-  re2::RE2::FullMatch(ToString(str), re, &major, &minor, &build, &revision);
-
-#endif
 
   return {major, minor, build, revision};
 }
@@ -79,8 +97,9 @@ WSTRING GetLocaleFromAssemblyReferenceString(const WSTRING& str) {
   }
 
 #else
-
+  Warn("[GetLocaleFromAssemblyReferenceString] Going to create regex: Culture=([a-zA-Z0-9]+)");
   static re2::RE2 re("Culture=([a-zA-Z0-9]+)", RE2::Quiet);
+  Warn("[GetLocaleFromAssemblyReferenceString] Finished creating regex: Culture=([a-zA-Z0-9]+)");
 
   std::string match;
   if (re2::RE2::FullMatch(ToString(str), re, &match)) {
@@ -109,8 +128,9 @@ PublicKey GetPublicKeyFromAssemblyReferenceString(const WSTRING& str) {
   }
 
 #else
-
+  Warn("[GetPublicKeyFromAssemblyReferenceString] Going to create regex: PublicKeyToken=([a-fA-F0-9]{16})");
   static re2::RE2 re("PublicKeyToken=([a-fA-F0-9]{16})");
+  Warn("[GetPublicKeyFromAssemblyReferenceString] Finished creating regex: PublicKeyToken=([a-fA-F0-9]{16})");
   std::string match;
   if (re2::RE2::FullMatch(ToString(str), re, &match)) {
     for (int i = 0; i < 8; i++) {
