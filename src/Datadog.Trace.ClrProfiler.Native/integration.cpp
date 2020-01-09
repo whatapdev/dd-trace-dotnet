@@ -88,25 +88,18 @@ Version GetVersionFromAssemblyReferenceString(const WSTRING& str) {
 WSTRING GetLocaleFromAssemblyReferenceString(const WSTRING& str) {
   WSTRING locale = "neutral"_W;
 
-#ifdef _WIN32
+  std::string cross_os_string = ToString(str);
+  std::size_t pos_culture_start = cross_os_string.find("Culture=");
+  if (pos_culture_start != std::string::npos) {
+    pos_culture_start += 8;
+    std::size_t pos_culture_end = cross_os_string.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", pos_culture_start);
 
-  static auto re = std::wregex("Culture=([a-zA-Z0-9]+)"_W);
-  std::wsmatch match;
-  if (std::regex_search(str, match, re) && match.size() == 2) {
-    locale = match.str(1);
+    if (pos_culture_end == std::string::npos) {
+      locale = ToWSTRING(cross_os_string.substr(pos_culture_start));
+    } else {
+      locale = ToWSTRING(cross_os_string.substr(pos_culture_start, pos_culture_end - pos_culture_start));
+    }
   }
-
-#else
-  Warn("[GetLocaleFromAssemblyReferenceString] Going to create regex: Culture=([a-zA-Z0-9]+)");
-  static re2::RE2 re("Culture=([a-zA-Z0-9]+)", RE2::Quiet);
-  Warn("[GetLocaleFromAssemblyReferenceString] Finished creating regex: Culture=([a-zA-Z0-9]+)");
-
-  std::string match;
-  if (re2::RE2::FullMatch(ToString(str), re, &match)) {
-    locale = ToWSTRING(match);
-  }
-
-#endif
 
   return locale;
 }
@@ -114,34 +107,28 @@ WSTRING GetLocaleFromAssemblyReferenceString(const WSTRING& str) {
 PublicKey GetPublicKeyFromAssemblyReferenceString(const WSTRING& str) {
   BYTE data[8] = {0};
 
-#ifdef _WIN32
+  std::string token_string;
+  std::string cross_os_string = ToString(str);
+  std::size_t pos_token_start = cross_os_string.find("PublicKeyToken=");
+  if (pos_token_start != std::string::npos) {
+    pos_token_start += 15;
+    std::size_t pos_token_end = cross_os_string.find_first_not_of("abcdefABCDEF0123456789");
 
-  static auto re = std::wregex("PublicKeyToken=([a-fA-F0-9]{16})"_W);
-  std::wsmatch match;
-  if (std::regex_search(str, match, re) && match.size() == 2) {
-    for (int i = 0; i < 8; i++) {
-      auto s = match.str(1).substr(i * 2, 2);
-      unsigned long x;
-      WSTRINGSTREAM(s) >> std::hex >> x;
-      data[i] = BYTE(x);
+    if (pos_token_end == std::string::npos) {
+      token_string = cross_os_string.substr(pos_token_start);
+    } else {
+      token_string = cross_os_string.substr(pos_token_start, pos_token_end - pos_token_start);
+    }
+
+    if (token_string.length() == 16) {
+      for (int i = 0; i < 8; i++) {
+        auto s = token_string.substr(i * 2, 2);
+        unsigned long x;
+        std::stringstream(s) >> std::hex >> x;
+        data[i] = BYTE(x);
+      }
     }
   }
-
-#else
-  Warn("[GetPublicKeyFromAssemblyReferenceString] Going to create regex: PublicKeyToken=([a-fA-F0-9]{16})");
-  static re2::RE2 re("PublicKeyToken=([a-fA-F0-9]{16})");
-  Warn("[GetPublicKeyFromAssemblyReferenceString] Finished creating regex: PublicKeyToken=([a-fA-F0-9]{16})");
-  std::string match;
-  if (re2::RE2::FullMatch(ToString(str), re, &match)) {
-    for (int i = 0; i < 8; i++) {
-      auto s = match.substr(i * 2, 2);
-      unsigned long x;
-      std::stringstream(s) >> std::hex >> x;
-      data[i] = BYTE(x);
-    }
-  }
-
-#endif
 
   return PublicKey(data);
 }
