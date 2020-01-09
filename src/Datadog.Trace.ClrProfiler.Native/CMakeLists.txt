@@ -59,7 +59,6 @@ target_include_directories("Datadog.Trace.ClrProfiler.Native.static"
     PUBLIC $<BUILD_INTERFACE:/opt/json/include>
 )
 target_link_libraries("Datadog.Trace.ClrProfiler.Native.static"
-    /opt/re2/obj/libre2.a
     -static-libgcc
     -static-libstdc++
 )

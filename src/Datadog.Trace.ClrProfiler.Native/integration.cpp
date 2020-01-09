@@ -1,12 +1,6 @@
 
 #include "integration.h"
 
-#ifdef _WIN32
-#include <regex>
-#else
-#include <regex>
-#include <re2/re2.h>
-#endif
 #include <sstream>
 
 #include "util.h"
