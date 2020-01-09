@@ -149,19 +149,30 @@ CorProfiler::Initialize(IUnknown* cor_profiler_info_unknown) {
   this->info_->AddRef();
   is_attached_ = true;
   profiler = this;
+  Info("[Initialize] Calling module_id_to_info_map_lock_.try_lock()");
+  if (module_id_to_info_map_lock_.try_lock()) {
+    Info("[Initialize] Successfully locked mutex module_id_to_info_map_lock_.");
+    module_id_to_info_map_lock_.unlock();
+    Info("[Initialize] Finished calling module_id_to_info_map_lock_.unlock()");
+  } else {
+    Info("Failed to lock mutex module_id_to_info_map_lock_");
+  }
   return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE CorProfiler::AssemblyLoadFinished(AssemblyID assembly_id,
     HRESULT hr_status) {
+  Info("Entering AssemblyLoadFinished");
   if (FAILED(hr_status)) {
     // if assembly failed to load, skip it entirely,
     // otherwise we can crash the process if module is not valid
     CorProfilerBase::AssemblyLoadFinished(assembly_id, hr_status);
+    Info("Exiting AssemblyLoadFinished");
     return S_OK;
   }
 
   if (!is_attached_) {
+    Info("Exiting AssemblyLoadFinished");
     return S_OK;
   }
 
@@ -171,11 +182,21 @@ HRESULT STDMETHODCALLTYPE CorProfiler::AssemblyLoadFinished(AssemblyID assembly_
 
   // keep this lock until we are done using the module,
   // to prevent it from unloading while in use
-  std::lock_guard<std::mutex> guard(module_id_to_info_map_lock_);
+  //Info("[AssemblyLoadFinished] Calling guard(module_id_to_info_map_lock_)");
+  //std::lock_guard<std::mutex> guard(module_id_to_info_map_lock_);
+  //Info("[AssemblyLoadFinished] Finished calling guard(module_id_to_info_map_lock_)");
+  Info("[AssemblyLoadFinished] Calling module_id_to_info_map_lock_.lock()");
+  module_id_to_info_map_lock_.lock();
+  Info("[AssemblyLoadFinished] Finished calling module_id_to_info_map_lock_.lock()");
 
   const auto assembly_info = GetAssemblyInfo(this->info_, assembly_id);
+  Info("AssemblyLoadFinished: Returned from GetAssemblyInfo");
   if (!assembly_info.IsValid()) {
+    Info("Exiting AssemblyLoadFinished");
+    module_id_to_info_map_lock_.unlock();
     return S_OK;
+  } else {
+    Info("AssemblyLoadFinished: assembly_info.IsValid()");
   }
 
   if (debug_logging_enabled) {
@@ -183,6 +204,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::AssemblyLoadFinished(AssemblyID assembly_
   }
 
   if (assembly_info.name != "Datadog.Trace.ClrProfiler.Managed"_W) {
+    Info("Exiting AssemblyLoadFinished");
+    module_id_to_info_map_lock_.unlock();
     return S_OK;
   }
 
@@ -194,6 +217,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::AssemblyLoadFinished(AssemblyID assembly_
   if (FAILED(hr)) {
     Warn("AssemblyLoadFinished failed to get metadata interface for module id ", assembly_info.manifest_module_id,
          " from assembly ", assembly_info.name);
+    Info("Exiting AssemblyLoadFinished");
+    module_id_to_info_map_lock_.unlock();
     return S_OK;
   }
 
@@ -225,28 +250,43 @@ HRESULT STDMETHODCALLTYPE CorProfiler::AssemblyLoadFinished(AssemblyID assembly_
     Warn("AssemblyLoadFinished: Datadog.Trace.ClrProfiler.Managed v", ws.str(), " did not match profiler version v", PROFILER_VERSION);
   }
 
+  Info("Exiting AssemblyLoadFinished");
+  module_id_to_info_map_lock_.unlock();
   return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id,
                                                           HRESULT hr_status) {
+  Info("Entering ModuleLoadFinished");
   if (FAILED(hr_status)) {
     // if module failed to load, skip it entirely,
     // otherwise we can crash the process if module is not valid
     CorProfilerBase::ModuleLoadFinished(module_id, hr_status);
+    Info("Exiting ModuleLoadFinished");
     return S_OK;
   }
 
   if (!is_attached_) {
+    Info("Exiting ModuleLoadFinished");
     return S_OK;
   }
 
   // keep this lock until we are done using the module,
   // to prevent it from unloading while in use
-  std::lock_guard<std::mutex> guard(module_id_to_info_map_lock_);
+  //Info("[ModuleLoadFinished] Calling guard(module_id_to_info_map_lock_)");
+  //std::lock_guard<std::mutex> guard(module_id_to_info_map_lock_);
+  //Info("[ModuleLoadFinished] Finished calling guard(module_id_to_info_map_lock_)");
+
+  Info("[ModuleLoadFinished] Calling module_id_to_info_map_lock_.lock()");
+  module_id_to_info_map_lock_.lock();
+  Info("[ModuleLoadFinished] Finished calling module_id_to_info_map_lock_.lock()");
 
   const auto module_info = GetModuleInfo(this->info_, module_id);
   if (!module_info.IsValid()) {
+    Info("[ModuleLoadFinished] Calling module_id_to_info_map_lock_.unlock()");
+    module_id_to_info_map_lock_.unlock();
+    Info("[ModuleLoadFinished] Finished calling module_id_to_info_map_lock_.unlock()");
+    Info("Exiting ModuleLoadFinished");
     return S_OK;
   }
 
@@ -265,6 +305,10 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id,
        module_info.assembly.name == "System.Private.CoreLib"_W)) {
     corlib_module_loaded = true;
     corlib_app_domain_id = app_domain_id;
+    Info("[ModuleLoadFinished] Calling module_id_to_info_map_lock_.unlock()");
+    module_id_to_info_map_lock_.unlock();
+    Info("[ModuleLoadFinished] Finished calling module_id_to_info_map_lock_.unlock()");
+    Info("Exiting ModuleLoadFinished");
     return S_OK;
   }
 
@@ -273,6 +317,10 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id,
     // or instrument their IL.
     Debug("ModuleLoadFinished skipping Windows Metadata module: ", module_id,
           " ", module_info.assembly.name);
+    Info("[ModuleLoadFinished] Calling module_id_to_info_map_lock_.unlock()");
+    module_id_to_info_map_lock_.unlock();
+    Info("[ModuleLoadFinished] Finished calling module_id_to_info_map_lock_.unlock()");
+    Info("Exiting ModuleLoadFinished");
     return S_OK;
   }
 
@@ -315,6 +363,10 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id,
     if (module_info.assembly.name == skip_assembly) {
       Debug("ModuleLoadFinished skipping known module: ", module_id, " ",
             module_info.assembly.name);
+      Info("[ModuleLoadFinished] Calling module_id_to_info_map_lock_.unlock()");
+      module_id_to_info_map_lock_.unlock();
+      Info("[ModuleLoadFinished] Finished calling module_id_to_info_map_lock_.unlock()");
+      Info("Exiting ModuleLoadFinished");
       return S_OK;
     }
   }
@@ -328,6 +380,10 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id,
     // we don't need to instrument anything in this module, skip it
     Debug("ModuleLoadFinished skipping module (filtered by caller): ",
           module_id, " ", module_info.assembly.name);
+    Info("[ModuleLoadFinished] Calling module_id_to_info_map_lock_.unlock()");
+    module_id_to_info_map_lock_.unlock();
+    Info("[ModuleLoadFinished] Finished calling module_id_to_info_map_lock_.unlock()");
+    Info("Exiting ModuleLoadFinished");
     return S_OK;
   }
 
@@ -339,6 +395,10 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id,
   if (FAILED(hr)) {
     Warn("ModuleLoadFinished failed to get metadata interface for ", module_id,
          " ", module_info.assembly.name);
+    Info("[ModuleLoadFinished] Calling module_id_to_info_map_lock_.unlock()");
+    module_id_to_info_map_lock_.unlock();
+    Info("[ModuleLoadFinished] Finished calling module_id_to_info_map_lock_.unlock()");
+    Info("Exiting ModuleLoadFinished");
     return S_OK;
   }
 
@@ -357,6 +417,10 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id,
     // we don't need to instrument anything in this module, skip it
     Debug("ModuleLoadFinished skipping module (filtered by target): ",
           module_id, " ", module_info.assembly.name);
+    Info("[ModuleLoadFinished] Calling module_id_to_info_map_lock_.unlock()");
+    module_id_to_info_map_lock_.unlock();
+    Info("[ModuleLoadFinished] Finished calling module_id_to_info_map_lock_.unlock()");
+    Info("Exiting ModuleLoadFinished");
     return S_OK;
   }
 
@@ -365,6 +429,10 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id,
   if (FAILED(hr)) {
     Warn("ModuleLoadFinished failed to get module metadata token for ",
          module_id, " ", module_info.assembly.name);
+    Info("[ModuleLoadFinished] Calling module_id_to_info_map_lock_.unlock()");
+    module_id_to_info_map_lock_.unlock();
+    Info("[ModuleLoadFinished] Finished calling module_id_to_info_map_lock_.unlock()");
+    Info("Exiting ModuleLoadFinished");
     return S_OK;
   }
 
@@ -373,6 +441,10 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id,
   if (FAILED(hr)) {
     Warn("ModuleLoadFinished failed to get module_version_id for ", module_id,
          " ", module_info.assembly.name);
+    Info("[ModuleLoadFinished] Calling module_id_to_info_map_lock_.unlock()");
+    module_id_to_info_map_lock_.unlock();
+    Info("[ModuleLoadFinished] Finished calling module_id_to_info_map_lock_.unlock()");
+    Info("Exiting ModuleLoadFinished");
     return S_OK;
   }
 
@@ -388,10 +460,15 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id,
         module_info.assembly.name, " AppDomain ",
         module_info.assembly.app_domain_id, " ",
         module_info.assembly.app_domain_name);
+  Info("[ModuleLoadFinished] Calling module_id_to_info_map_lock_.unlock()");
+  module_id_to_info_map_lock_.unlock();
+  Info("[ModuleLoadFinished] Finished calling module_id_to_info_map_lock_.unlock()");
+  Info("Exiting ModuleLoadFinished");
   return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE CorProfiler::ModuleUnloadStarted(ModuleID module_id) {
+  Info("Calling ModuleUnloadStarted");
   if (debug_logging_enabled) {
     const auto module_info = GetModuleInfo(this->info_, module_id);
 
@@ -426,6 +503,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleUnloadStarted(ModuleID module_id) {
 }
 
 HRESULT STDMETHODCALLTYPE CorProfiler::Shutdown() {
+  Info("Calling Shutdown");
   CorProfilerBase::Shutdown();
 
   // keep this lock until we are done using the module,
@@ -438,13 +516,16 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Shutdown() {
 
 HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStarted(
     FunctionID function_id, BOOL is_safe_to_block) {
+  Info("Entering JITCompilationStarted");
   if (!is_attached_ || !is_safe_to_block) {
     return S_OK;
   }
 
   // keep this lock until we are done using the module,
   // to prevent it from unloading while in use
+  Info("[JITCompilationStarted] Calling guard(module_id_to_info_map_lock_)");
   std::lock_guard<std::mutex> guard(module_id_to_info_map_lock_);
+  Info("[JITCompilationStarted] Finished calling guard(module_id_to_info_map_lock_)");
 
   ModuleID module_id;
   mdToken function_token = mdTokenNil;
