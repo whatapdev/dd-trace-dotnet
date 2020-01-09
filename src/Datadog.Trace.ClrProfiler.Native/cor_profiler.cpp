@@ -149,14 +149,15 @@ CorProfiler::Initialize(IUnknown* cor_profiler_info_unknown) {
   this->info_->AddRef();
   is_attached_ = true;
   profiler = this;
-  Info("[Initialize] Calling module_id_to_info_map_lock_.try_lock()");
-  if (module_id_to_info_map_lock_.try_lock()) {
-    Info("[Initialize] Successfully locked mutex module_id_to_info_map_lock_.");
-    module_id_to_info_map_lock_.unlock();
-    Info("[Initialize] Finished calling module_id_to_info_map_lock_.unlock()");
-  } else {
-    Info("Failed to lock mutex module_id_to_info_map_lock_");
-  }
+
+  /*
+  module_id_to_info_map_lock_.lock();
+  Info("[Initialize] Called module_id_to_info_map_lock_.lock()");
+
+  module_id_to_info_map_lock_.unlock();
+  Info("[Initialize] Called module_id_to_info_map_lock_.unlock()");
+  */
+
   return S_OK;
 }
 
