@@ -274,6 +274,36 @@
     ]
   },
   {
+    "name": "AspNetCoreStartup",
+    "method_replacements": [
+      {
+        "caller": {},
+        "target": {
+          "assembly": "Microsoft.AspNetCore.Hosting",
+          "type": "Microsoft.AspNetCore.Hosting.WebHostBuilderExtensions",
+          "method": "UseStartup",
+          "signature_types": [
+            "Microsoft.AspNetCore.Hosting.IWebHostBuilder",
+            "Microsoft.AspNetCore.Hosting.IWebHostBuilder",
+            "System.Type"
+          ],
+          "minimum_major": 2,
+          "minimum_minor": 0,
+          "minimum_patch": 0,
+          "maximum_major": 3,
+          "maximum_minor": 65535,
+          "maximum_patch": 65535
+        },
+        "wrapper": {
+          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.11.0.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "type": "Datadog.Trace.ClrProfiler.Integrations.AspNet.AspNetCoreStartup",
+          "method": "AddDatadogTracing",
+          "signature": "00 01 1C 1C"
+        }
+      }
+    ]
+  },
+  {
     "name": "AspNetMvc",
     "method_replacements": [
       {

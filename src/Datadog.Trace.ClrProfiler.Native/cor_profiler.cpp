@@ -1,11 +1,11 @@
 #include "cor_profiler.h"
 
 #include <corprof.h>
-#include <string>
-#include "corhlpr.h"
 
-#include "version.h"
+#include <string>
+
 #include "clr_helpers.h"
+#include "corhlpr.h"
 #include "dllmain.h"
 #include "environment_variables.h"
 #include "il_rewriter.h"
@@ -17,6 +17,7 @@
 #include "pal.h"
 #include "resource.h"
 #include "util.h"
+#include "version.h"
 
 namespace trace {
 
@@ -152,7 +153,8 @@ CorProfiler::Initialize(IUnknown* cor_profiler_info_unknown) {
   return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CorProfiler::AssemblyLoadFinished(AssemblyID assembly_id,
+HRESULT STDMETHODCALLTYPE
+CorProfiler::AssemblyLoadFinished(AssemblyID assembly_id,
     HRESULT hr_status) {
   if (FAILED(hr_status)) {
     // if assembly failed to load, skip it entirely,
@@ -205,18 +207,18 @@ HRESULT STDMETHODCALLTYPE CorProfiler::AssemblyLoadFinished(AssemblyID assembly_
   // Configure a version string to compare with the profiler version
   WSTRINGSTREAM ws;
   ws << ToWSTRING(assembly_metadata.version.major)
-      << '.'_W
-      << ToWSTRING(assembly_metadata.version.minor)
-      << '.'_W
-      << ToWSTRING(assembly_metadata.version.build);
+     << '.'_W
+     << ToWSTRING(assembly_metadata.version.minor)
+     << '.'_W
+     << ToWSTRING(assembly_metadata.version.build);
 
   // Check that Major.Minor.Build match the profiler version
   if (ws.str() == ToWSTRING(PROFILER_VERSION)) {
     Info("AssemblyLoadFinished: Datadog.Trace.ClrProfiler.Managed v", ws.str(), " matched profiler version v", PROFILER_VERSION);
     managed_profiler_loaded_app_domains.insert(assembly_info.app_domain_id);
-      
+
     if (runtime_information_.is_desktop() && corlib_module_loaded &&
-          assembly_info.app_domain_id == corlib_app_domain_id) {
+        assembly_info.app_domain_id == corlib_app_domain_id) {
       Info("AssemblyLoadFinished: Datadog.Trace.ClrProfiler.Managed was loaded domain-neutral");
       managed_profiler_loaded_domain_neutral = true;
     }
@@ -480,7 +482,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStarted(
 
   if (!ProfilerAssemblyIsLoadedIntoAppDomain(module_metadata->app_domain_id) &&
       first_jit_compilation_app_domains.find(module_metadata->app_domain_id) ==
-      first_jit_compilation_app_domains.end()) {
+          first_jit_compilation_app_domains.end()) {
     first_jit_compilation_app_domains.insert(module_metadata->app_domain_id);
     hr = RunILStartupHook(module_metadata->metadata_emit, module_id,
                           function_token);
@@ -548,6 +550,10 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStarted(
         continue;
       }
 
+      bool sig_difference_expected = false;
+      sig_difference_expected =
+          target.name == "UseStartup"_W && target.is_generic == 0;
+
       // we add 3 parameters to every wrapper method: opcode, mdToken, and
       // module_version_id
       const short added_parameters_count = 3;
@@ -555,7 +561,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStarted(
       auto wrapper_method_signature_size =
           method_replacement.wrapper_method.method_signature.data.size();
 
-      if (wrapper_method_signature_size < (added_parameters_count + 3)) {
+      if (wrapper_method_signature_size < (added_parameters_count + 3) && !sig_difference_expected) {
         // wrapper signature must have at least 6 bytes
         // 0:{CallingConvention}|1:{ParamCount}|2:{ReturnType}|3:{OpCode}|4:{mdToken}|5:{ModuleVersionId}
         if (debug_logging_enabled) {
@@ -585,7 +591,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStarted(
 
       auto target_arg_count = target.signature.NumberOfArguments();
 
-      if (expected_number_args != target_arg_count) {
+      if (expected_number_args != target_arg_count && !sig_difference_expected) {
         // Number of arguments does not match our wrapper method
         if (debug_logging_enabled) {
           Debug(
@@ -694,7 +700,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStarted(
         continue;
       }
 
-      if (actual_sig.size() != expected_sig.size()) {
+      if (actual_sig.size() != expected_sig.size() &&
+          !sig_difference_expected) {
         // we can't safely assume our wrapper methods handle the types
         if (debug_logging_enabled) {
           Debug(
@@ -734,7 +741,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStarted(
         }
       }
 
-      if (!is_match) {
+      if (!is_match && !sig_difference_expected) {
         // signatures don't match
         continue;
       }
@@ -746,6 +753,15 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStarted(
             "function_id=",
             function_id, " token=", function_token, " target_name=", target.type.name,
             ".", target.name, "()");
+        continue;
+      }
+
+      if (target.name == "UseStartup"_W && target.is_generic == 0) {
+        ILRewriterWrapper rewriter_wrapper(&rewriter);
+        rewriter_wrapper.SetILPosition(pInstr);
+        rewriter_wrapper.CallMemberAfter(wrapper_method_ref, false);
+        modified = true;
+        Info("Added AspNetCore launcher");
         continue;
       }
 

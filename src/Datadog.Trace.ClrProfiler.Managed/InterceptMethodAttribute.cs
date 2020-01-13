@@ -103,5 +103,10 @@ namespace Datadog.Trace.ClrProfiler
             get => TargetVersionRange.MaximumVersion;
             set => TargetVersionRange.MaximumVersion = value;
         }
+
+        /// <summary>
+        /// Gets or sets the strict signature check when emitting to the integration file that the profiler sees.
+        /// </summary>
+        public bool EnforceSignatureCheck { get; set; } = true;
     }
 }
