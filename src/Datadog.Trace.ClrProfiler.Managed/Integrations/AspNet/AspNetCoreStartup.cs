@@ -24,16 +24,20 @@ namespace Datadog.Trace.ClrProfiler.Integrations.AspNet
             EnforceSignatureCheck = false)]
         public static object AddDatadogTracing(object hostBuilder)
         {
+#if NETSTANDARD
             try
             {
                 // TODO: Implement something sane here. Hard dependencies may be a no-no so possibly use reflection here.
-                // return Datadog.Trace.Diagnostics.Configuration.WebHostBuilderHelpers.AddDatadogTracing(hostBuilder);
-                return hostBuilder;
+                return Datadog.Trace.Diagnostics.Configuration.WebHostBuilderHelpers.AddDatadogTracing(hostBuilder);
+                //return hostBuilder;
             }
             catch (Exception)
             {
                 return hostBuilder;
             }
+#else
+            return hostBuilder;
+#endif
         }
     }
 }
