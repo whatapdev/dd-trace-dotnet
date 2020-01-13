@@ -63,7 +63,7 @@ namespace GenerateIntegrationDefinitions
                                                                  assembly = integrationsAssembly.FullName,
                                                                  type = item.wrapperType.FullName,
                                                                  method = item.wrapperMethod.Name,
-                                                                 signature = GetMethodSignature(item.wrapperMethod)
+                                                                 signature = GetMethodSignature(item.wrapperMethod, item.attribute.EnforceSignatureCheck)
                                                              }
                                                          }
                                };
@@ -101,7 +101,7 @@ namespace GenerateIntegrationDefinitions
             return typeName;
         }
 
-        private static string GetMethodSignature(MethodInfo method)
+        private static string GetMethodSignature(MethodInfo method, bool enforceSignatureCheck)
         {
             var returnType = method.ReturnType;
             var parameters = method.GetParameters().Select(p => p.ParameterType).ToArray();
@@ -109,7 +109,7 @@ namespace GenerateIntegrationDefinitions
             var requiredParameterTypes = new[] { typeof(int), typeof(int), typeof(long) };
             var lastParameterTypes = parameters.Skip(parameters.Length - requiredParameterTypes.Length);
 
-            if (!lastParameterTypes.SequenceEqual(requiredParameterTypes))
+            if (!lastParameterTypes.SequenceEqual(requiredParameterTypes) && enforceSignatureCheck)
             {
                 throw new Exception(
                     $"Method {method.DeclaringType.FullName}.{method.Name}() does not meet parameter requirements. " +
