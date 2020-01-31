@@ -96,6 +96,15 @@ services:
     volumes:
     - ./:/project
 
+  Profiler-Musl:
+    build:
+      context: ./
+      dockerfile: ./docker/native-musl.dockerfile
+    image: datadog-native-musl
+    command: /project/docker/Datadog.Trace.ClrProfiler.Native.sh
+    volumes:
+    - ./:/project
+
   Samples.ServiceStack.Redis:
     build:
       context: ./
