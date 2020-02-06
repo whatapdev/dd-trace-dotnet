@@ -1,7 +1,6 @@
 using System;
 using System.Threading;
 using Datadog.Trace.ExtensionMethods;
-using Datadog.Trace.Logging;
 
 namespace Datadog.Trace
 {
@@ -10,8 +9,8 @@ namespace Datadog.Trace
     /// </summary>
     public class SpanContext : ISpanContext
     {
-        private static readonly Vendors.Serilog.ILogger Log = DatadogLogging.For<SpanContext>();
-        private static ThreadLocal<Random> _random = new ThreadLocal<Random>(() => new Random());
+        private static readonly ThreadLocal<Random> Random = new ThreadLocal<Random>(() => new Random());
+        private static ICoreLogger _log = null;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SpanContext"/> class
@@ -27,6 +26,10 @@ namespace Datadog.Trace
         {
             SpanId = spanId;
             SamplingPriority = samplingPriority;
+            if (_log == null)
+            {
+                _log = CoreLogStrategy.For<SpanContext>();
+            }
         }
 
         /// <summary>
@@ -39,7 +42,7 @@ namespace Datadog.Trace
         internal SpanContext(ISpanContext parent, ITraceContext traceContext, string serviceName)
             : this(parent?.TraceId, serviceName)
         {
-            SpanId = _random.Value.NextUInt63();
+            SpanId = Random.Value.NextUInt63();
             Parent = parent;
             TraceContext = traceContext;
         }
@@ -48,13 +51,13 @@ namespace Datadog.Trace
         {
             TraceId = traceId > 0
                           ? traceId.Value
-                          : _random.Value.NextUInt63();
+                          : Random.Value.NextUInt63();
 
             ServiceName = serviceName;
         }
 
         /// <summary>
-        /// Gets the parent context.
+        /// Gets the public parent context.
         /// </summary>
         public ISpanContext Parent { get; }
 

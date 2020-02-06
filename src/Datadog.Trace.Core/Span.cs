@@ -4,8 +4,6 @@ using System.Globalization;
 using System.Text;
 using Datadog.Trace.Abstractions;
 using Datadog.Trace.ExtensionMethods;
-using Datadog.Trace.Logging;
-using Datadog.Trace.Vendors.Serilog.Events;
 
 namespace Datadog.Trace
 {
@@ -17,8 +15,8 @@ namespace Datadog.Trace
     /// </summary>
     public class Span : IDisposable, ISpan
     {
-        private static readonly Vendors.Serilog.ILogger Log = DatadogLogging.For<Span>();
-        private static readonly bool IsLogLevelDebugEnabled = Log.IsEnabled(LogEventLevel.Debug);
+        private static ICoreLogger _log = null;
+        private static bool _isLogLevelDebugEnabled;
 
         private readonly object _lock = new object();
 
@@ -28,7 +26,13 @@ namespace Datadog.Trace
             ServiceName = context.ServiceName;
             StartTime = start ?? Context.TraceContext.UtcNow;
 
-            Log.Debug(
+            if (_log == null)
+            {
+                _log = CoreLogStrategy.For<Span>();
+                _isLogLevelDebugEnabled = _log.IsEnabled(LogEventLevel.Debug);
+            }
+
+            _log.Debug(
                 "Span started: [s_id: {0}, p_id: {1}, t_id: {2}]",
                 SpanId,
                 Context.ParentId,
@@ -49,7 +53,6 @@ namespace Datadog.Trace
         /// Gets or sets the type of request this span represents (ex: web, db).
         /// Not to be confused with span kind.
         /// </summary>
-        /// <seealso cref="SpanTypes"/>
         public string Type { get; set; }
 
         /// <summary>
@@ -142,7 +145,7 @@ namespace Datadog.Trace
         {
             if (IsFinished)
             {
-                Log.Debug("SetTag should not be called after the span was closed");
+                _log.Debug("SetTag should not be called after the span was closed");
                 return this;
             }
 
@@ -157,7 +160,7 @@ namespace Datadog.Trace
             // some tags have special meaning
             switch (key)
             {
-                case Trace.Tags.SamplingPriority:
+                case CoreTags.SamplingPriority:
                     if (Enum.TryParse(value, out SamplingPriority samplingPriority) &&
                         Enum.IsDefined(typeof(SamplingPriority), samplingPriority))
                     {
@@ -167,8 +170,7 @@ namespace Datadog.Trace
 
                     break;
 #pragma warning disable CS0618 // Type or member is obsolete
-                case Trace.Tags.ForceKeep:
-                case Trace.Tags.ManualKeep:
+                case CoreTags.ManualKeep:
                     if (value.ToBoolean() ?? false)
                     {
                         // user-friendly tag to set UserKeep priority
@@ -176,8 +178,7 @@ namespace Datadog.Trace
                     }
 
                     break;
-                case Trace.Tags.ForceDrop:
-                case Trace.Tags.ManualDrop:
+                case CoreTags.ManualDrop:
                     if (value.ToBoolean() ?? false)
                     {
                         // user-friendly tag to set UserReject priority
@@ -186,7 +187,7 @@ namespace Datadog.Trace
 
                     break;
 #pragma warning restore CS0618 // Type or member is obsolete
-                case Trace.Tags.Analytics:
+                case CoreTags.Analytics:
                     // value is a string and can represent a bool ("true") or a double ("0.5"),
                     // so try to parse both.
                     // note that "1" and "0" can parse as either type,
@@ -196,12 +197,12 @@ namespace Datadog.Trace
                     if (boolean == true)
                     {
                         // always sample
-                        SetMetric(Trace.Tags.Analytics, 1.0);
+                        SetMetric(CoreTags.Analytics, 1.0);
                     }
                     else if (boolean == false)
                     {
                         // never sample
-                        SetMetric(Trace.Tags.Analytics, 0.0);
+                        SetMetric(CoreTags.Analytics, 0.0);
                     }
                     else if (double.TryParse(
                         value,
@@ -210,11 +211,11 @@ namespace Datadog.Trace
                         out double analyticsSampleRate))
                     {
                         // use specified sample rate
-                        SetMetric(Trace.Tags.Analytics, analyticsSampleRate);
+                        SetMetric(CoreTags.Analytics, analyticsSampleRate);
                     }
                     else
                     {
-                        Log.Warning("Value {0} has incorrect format for tag {1}", value, Trace.Tags.Analytics);
+                        _log.Warning("Value {0} has incorrect format for tag {1}", value, CoreTags.Analytics);
                     }
 
                     break;
@@ -273,9 +274,9 @@ namespace Datadog.Trace
             {
                 Context.TraceContext.CloseSpan(this);
 
-                if (IsLogLevelDebugEnabled)
+                if (_isLogLevelDebugEnabled)
                 {
-                    Log.Debug(
+                    _log.Debug(
                         "Span closed: [s_id: {0}, p_id: {1}, t_id: {2}] for (Service: {3}, Resource: {4}, Operation: {5}, Tags: [{6}])",
                         SpanId,
                         Context.ParentId,
@@ -315,9 +316,9 @@ namespace Datadog.Trace
                     exception = aggregateException.InnerExceptions[0];
                 }
 
-                SetTag(Trace.Tags.ErrorMsg, exception.Message);
-                SetTag(Trace.Tags.ErrorStack, exception.ToString());
-                SetTag(Trace.Tags.ErrorType, exception.GetType().ToString());
+                SetTag(CoreTags.ErrorMsg, exception.Message);
+                SetTag(CoreTags.ErrorStack, exception.ToString());
+                SetTag(CoreTags.ErrorType, exception.GetType().ToString());
             }
         }
 

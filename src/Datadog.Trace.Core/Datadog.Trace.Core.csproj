@@ -1,0 +1,10 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- NuGet -->
+    <Version>0.1.0-prerelease</Version>
+    <Title>Context Storage for Datadog APM</Title>
+    <Description>Context storage and management for Datadog .NET Tracer library.</Description>
+  </PropertyGroup>
+
+</Project>

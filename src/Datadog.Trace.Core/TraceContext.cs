@@ -1,33 +1,38 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Datadog.Trace.Logging;
 
 namespace Datadog.Trace
 {
     internal class TraceContext : ITraceContext
     {
-        private static readonly Vendors.Serilog.ILogger Log = DatadogLogging.For<TraceContext>();
+        private static ICoreLogger _log = null;
 
         private readonly object _lock = new object();
         private readonly DateTimeOffset _utcStart = DateTimeOffset.UtcNow;
         private readonly Stopwatch _stopwatch = Stopwatch.StartNew();
+
+        private readonly Action<List<Span>> _submit;
+        private readonly Func<Span, SamplingPriority> _getSamplingPriority;
 
         private List<Span> _spans = new List<Span>();
         private int _openSpans;
         private SamplingPriority? _samplingPriority;
         private bool _samplingPriorityLocked;
 
-        public TraceContext(IDatadogTracer tracer)
+        public TraceContext(Action<List<Span>> submit, Func<Span, SamplingPriority> getSamplingPriority)
         {
-            Tracer = tracer;
+            _submit = submit;
+            _getSamplingPriority = getSamplingPriority;
+            if (_log == null)
+            {
+                _log = CoreLogStrategy.For<TraceContext>();
+            }
         }
 
         public Span RootSpan { get; private set; }
 
         public DateTimeOffset UtcNow => _utcStart.Add(_stopwatch.Elapsed);
-
-        public IDatadogTracer Tracer { get; }
 
         /// <summary>
         /// Gets or sets sampling priority.
@@ -68,8 +73,7 @@ namespace Datadog.Trace
                         {
                             // this is a local root span (i.e. not propagated).
                             // determine an initial sampling priority for this trace, but don't lock it yet
-                            _samplingPriority =
-                                Tracer.Sampler?.GetSamplingPriority(RootSpan);
+                            _samplingPriority = _getSamplingPriority(RootSpan);
                         }
                     }
                 }
@@ -88,7 +92,7 @@ namespace Datadog.Trace
 
                 if (_samplingPriority == null)
                 {
-                    Log.Warning("Cannot set span metric for sampling priority before it has been set.");
+                    _log.Warning("Cannot set span metric for sampling priority before it has been set.");
                 }
                 else
                 {
@@ -111,7 +115,7 @@ namespace Datadog.Trace
 
             if (spansToWrite != null)
             {
-                Tracer.Write(spansToWrite);
+                _submit(spansToWrite);
             }
         }
 
@@ -119,7 +123,7 @@ namespace Datadog.Trace
         {
             if (_samplingPriority == null)
             {
-                Log.Warning("Cannot lock sampling priority before it has been set.");
+                _log.Warning("Cannot lock sampling priority before it has been set.");
             }
             else
             {

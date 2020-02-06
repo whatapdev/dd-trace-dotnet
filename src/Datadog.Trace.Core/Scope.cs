@@ -1,3 +1,4 @@
+using System;
 using Datadog.Trace.Abstractions;
 
 namespace Datadog.Trace
@@ -10,6 +11,8 @@ namespace Datadog.Trace
     /// </summary>
     public class Scope : IScope
     {
+        private static ICoreLogger _log = null;
+
         private readonly IScopeManager _scopeManager;
         private readonly bool _finishOnClose;
 
@@ -19,6 +22,11 @@ namespace Datadog.Trace
             Span = span;
             _scopeManager = scopeManager;
             _finishOnClose = finishOnClose;
+
+            if (_log == null)
+            {
+                _log = CoreLogStrategy.For<Scope>();
+            }
         }
 
         /// <summary>
@@ -56,10 +64,10 @@ namespace Datadog.Trace
             {
                 Close();
             }
-            catch
+            catch (Exception ex)
             {
                 // Ignore disposal exceptions here...
-                // TODO: Log? only in test/debug? How should Close() concerns be handled (i.e. independent?)
+                _log.Error(ex, "Error when closing scope.");
             }
         }
     }

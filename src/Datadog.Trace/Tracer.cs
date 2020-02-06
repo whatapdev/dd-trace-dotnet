@@ -280,14 +280,14 @@ namespace Datadog.Trace
             if (parent is SpanContext parentSpanContext)
             {
                 traceContext = parentSpanContext.TraceContext ??
-                               new TraceContext(this)
+                               new TraceContext(_agentWriter.WriteTrace, Sampler.GetSamplingPriority)
                                {
                                    SamplingPriority = parentSpanContext.SamplingPriority
                                };
             }
             else
             {
-                traceContext = new TraceContext(this);
+                traceContext = new TraceContext(_agentWriter.WriteTrace, Sampler.GetSamplingPriority);
             }
 
             var finalServiceName = serviceName ?? parent?.ServiceName ?? DefaultServiceName;
@@ -303,7 +303,7 @@ namespace Datadog.Trace
             // automatically add the "env" tag if defined
             if (!string.IsNullOrWhiteSpace(env))
             {
-                span.SetTag(Tags.Env, env);
+                span.SetTag(CoreTags.Env, env);
             }
 
             // Apply any global tags

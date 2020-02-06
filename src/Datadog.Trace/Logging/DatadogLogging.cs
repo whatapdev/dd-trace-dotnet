@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using Datadog.Trace.Configuration;
 using Datadog.Trace.Vendors.Serilog;
-using Datadog.Trace.Vendors.Serilog.Events;
 using Datadog.Trace.Vendors.Serilog.Sinks.File;
 
 namespace Datadog.Trace.Logging
@@ -18,7 +17,7 @@ namespace Datadog.Trace.Logging
 
         private static readonly ConcurrentQueue<Action<ILogger>> ActionsToRunWhenLoggerReady = new ConcurrentQueue<Action<ILogger>>();
 
-        private static readonly ILogger SharedLogger = null;
+        private static readonly Vendors.Serilog.Core.Logger SharedLogger = null;
         private static readonly bool Initialized = false;
 
         static DatadogLogging()
@@ -133,6 +132,10 @@ namespace Datadog.Trace.Logging
                 Initialized = true;
                 // nothing else to do here
             }
+            finally
+            {
+                CoreLogStrategy.SetStrategy(GetSharedLogger);
+            }
         }
 
         public static void RegisterStartupLog(Action<ILogger> logAction)
@@ -156,14 +159,19 @@ namespace Datadog.Trace.Logging
 
         public static ILogger GetLogger(Type classType)
         {
-            // Tells us which types are loaded, when, and how often.
-            SharedLogger.Debug($"Logger retrieved for: {classType.AssemblyQualifiedName}");
-            return SharedLogger;
+            return GetSharedLogger(classType);
         }
 
         public static ILogger For<T>()
         {
             return GetLogger(typeof(T));
+        }
+
+        private static Vendors.Serilog.Core.Logger GetSharedLogger(Type classType)
+        {
+            // Tells us which types are loaded, when, and how often.
+            SharedLogger.Debug($"Logger retrieved for: {classType.AssemblyQualifiedName}");
+            return SharedLogger;
         }
     }
 }

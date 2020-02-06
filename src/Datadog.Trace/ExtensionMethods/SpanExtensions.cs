@@ -56,11 +56,11 @@ namespace Datadog.Trace.ExtensionMethods
         {
             span.Type = SpanTypes.Web;
             span.ResourceName = resourceName?.Trim();
-            span.SetTag(Tags.SpanKind, SpanKinds.Server);
+            span.SetTag(CoreTags.SpanKind, SpanKinds.Server);
             span.SetTag(Tags.HttpMethod, method);
             span.SetTag(Tags.HttpRequestHeadersHost, host);
             span.SetTag(Tags.HttpUrl, httpUrl);
-            span.SetTag(Tags.Language, TracerConstants.Language);
+            span.SetTag(CoreTags.Language, TracerConstants.Language);
         }
 
         private static string GetConnectionStringValue(DbConnectionStringBuilder builder, params string[] names)
