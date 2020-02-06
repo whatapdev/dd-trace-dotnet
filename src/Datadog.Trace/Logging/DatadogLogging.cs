@@ -29,6 +29,8 @@ namespace Datadog.Trace.Logging
                    .CreateLogger();
             try
             {
+                CoreLogStrategy.SetStrategy(GetSharedLogger);
+
                 // We use environment variables and not the tracer settings to avoid a startup race condition between the logger and the tracer.
                 if (Environment.GetEnvironmentVariable(ConfigurationKeys.DebugEnabled) == "1")
                 {
@@ -131,10 +133,6 @@ namespace Datadog.Trace.Logging
                 // If for some reason the logger initialization fails, don't let the queue fill
                 Initialized = true;
                 // nothing else to do here
-            }
-            finally
-            {
-                CoreLogStrategy.SetStrategy(GetSharedLogger);
             }
         }
 

@@ -1,6 +1,6 @@
 using System;
-using System.IO;
 using System.Linq;
+using Datadog.Trace.Logging;
 using Datadog.Trace.Sampling;
 using Xunit;
 
@@ -9,6 +9,7 @@ namespace Datadog.Trace.Tests.Sampling
     [Collection(nameof(Datadog.Trace.Tests.Sampling))]
     public class CustomSamplingRuleTests
     {
+        private static readonly object ForceLoggingLoad = DatadogLogging.For<CustomSamplingRuleTests>();
         private static readonly ulong Id = 1;
         private static readonly Span CartCheckoutSpan = new Span(new SpanContext(Id++, Id++, null, serviceName: "shopping-cart-service"), DateTimeOffset.Now) { OperationName = "checkout" };
         private static readonly Span AddToCartSpan = new Span(new SpanContext(Id++, Id++, null, serviceName: "shopping-cart-service"), DateTimeOffset.Now) { OperationName = "cart-add" };
