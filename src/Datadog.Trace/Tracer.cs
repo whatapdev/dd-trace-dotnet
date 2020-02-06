@@ -303,7 +303,7 @@ namespace Datadog.Trace
             // automatically add the "env" tag if defined
             if (!string.IsNullOrWhiteSpace(env))
             {
-                span.SetTag(CoreTags.Env, env);
+                span.SetTag(Tags.Env, env);
             }
 
             // Apply any global tags

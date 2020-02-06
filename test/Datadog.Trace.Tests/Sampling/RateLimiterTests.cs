@@ -16,7 +16,7 @@ namespace Datadog.Trace.Tests.Sampling
         [Fact]
         public void One_Is_Allowed()
         {
-            var traceContext = new TraceContext(Tracer.Instance);
+            var traceContext = new TraceContext(t => { }, Tracer.Instance.Sampler.GetSamplingPriority);
             var spanContext = new SpanContext(null, traceContext, "Weeeee");
             var span = new Span(spanContext, null);
             var rateLimiter = new RateLimiter(maxTracesPerInterval: null);
@@ -106,7 +106,7 @@ namespace Datadog.Trace.Tests.Sampling
 
         private static int AskTheRateLimiterABunchOfTimes(RateLimiter rateLimiter, int howManyTimes)
         {
-            var traceContext = new TraceContext(Tracer.Instance);
+            var traceContext = new TraceContext(t => { }, Tracer.Instance.Sampler.GetSamplingPriority);
             var spanContext = new SpanContext(null, traceContext, "Weeeee");
             var span = new Span(spanContext, null);
 
@@ -146,7 +146,7 @@ namespace Datadog.Trace.Tests.Sampling
             var end = DateTime.Now;
             var endLock = new object();
 
-            var traceContext = new TraceContext(Tracer.Instance);
+            var traceContext = new TraceContext(t => { }, Tracer.Instance.Sampler.GetSamplingPriority);
 
             for (var i = 0; i < test.NumberOfBursts; i++)
             {

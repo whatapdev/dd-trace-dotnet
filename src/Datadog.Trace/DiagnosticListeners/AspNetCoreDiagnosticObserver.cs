@@ -160,13 +160,13 @@ namespace Datadog.Trace.DiagnosticListeners
                 SpanContext propagatedContext = ExtractPropagatedContext(request);
 
                 Span span = _tracer.StartSpan(HttpRequestInOperationName, propagatedContext)
-                                   .SetTag(CoreTags.InstrumentationName, ComponentName);
+                                   .SetTag(Tags.InstrumentationName, ComponentName);
 
                 span.DecorateWebServerSpan(resourceName, httpMethod, host, url);
 
                 // set analytics sample rate if enabled
                 var analyticsSampleRate = _tracer.Settings.GetIntegrationAnalyticsSampleRate(IntegrationName, enabledWithGlobalSetting: true);
-                span.SetMetric(CoreTags.Analytics, analyticsSampleRate);
+                span.SetMetric(Tags.Analytics, analyticsSampleRate);
 
                 Scope scope = _tracer.ActivateSpan(span);
 

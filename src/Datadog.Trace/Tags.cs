@@ -8,6 +8,28 @@ namespace Datadog.Trace
     public static class Tags
     {
         /// <summary>
+        /// The environment of the profiled service.
+        /// </summary>
+        public const string Env = "env";
+
+        /// <summary>
+        /// The name of the integration that generated the span.
+        /// Use OpenTracing tag "component"
+        /// </summary>
+        public const string InstrumentationName = CoreTags.InstrumentationName;
+
+        /// <summary>
+        /// The name of the method that was instrumented to generate the span.
+        /// </summary>
+        public const string InstrumentedMethod = CoreTags.InstrumentedMethod;
+
+        /// <summary>
+        /// The kind of span (e.g. client, server). Not to be confused with <see cref="Span.Type"/>.
+        /// </summary>
+        /// <seealso cref="SpanKinds"/>
+        public const string SpanKind = CoreTags.SpanKind;
+
+        /// <summary>
         /// The URL of an HTTP request
         /// </summary>
         public const string HttpUrl = "http.url";
@@ -26,6 +48,21 @@ namespace Datadog.Trace
         /// The status code of an HTTP response
         /// </summary>
         public const string HttpStatusCode = "http.status_code";
+
+        /// <summary>
+        /// The error message of an exception
+        /// </summary>
+        public const string ErrorMsg = CoreTags.ErrorMsg;
+
+        /// <summary>
+        /// The type of an exception
+        /// </summary>
+        public const string ErrorType = CoreTags.ErrorType;
+
+        /// <summary>
+        /// The stack trace of an exception
+        /// </summary>
+        public const string ErrorStack = CoreTags.ErrorStack;
 
         /// <summary>
         /// The type of database (e.g. mssql, mysql)
@@ -106,5 +143,30 @@ namespace Datadog.Trace
         /// The source defining the GraphQL request.
         /// </summary>
         public const string GraphQLSource = "graphql.source";
+
+        /// <summary>
+        /// The sampling priority for the entire trace.
+        /// </summary>
+        public const string SamplingPriority = CoreTags.SamplingPriority;
+
+        /// <summary>
+        /// A user-friendly tag that sets the sampling priority to <see cref="Trace.SamplingPriority.UserKeep"/>.
+        /// </summary>
+        public const string ManualKeep = CoreTags.ManualKeep;
+
+        /// <summary>
+        /// A user-friendly tag that sets the sampling priority to <see cref="Trace.SamplingPriority.UserReject"/>.
+        /// </summary>
+        public const string ManualDrop = CoreTags.ManualDrop;
+
+        /// <summary>
+        /// Configures Trace Analytics.
+        /// </summary>
+        public const string Analytics = CoreTags.Analytics;
+
+        /// <summary>
+        /// Language tag, applied to root spans that are .NET runtime (e.g., ASP.NET)
+        /// </summary>
+        public const string Language = CoreTags.Language;
     }
 }

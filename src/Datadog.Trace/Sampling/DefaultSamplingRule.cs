@@ -26,7 +26,7 @@ namespace Datadog.Trace.Sampling
         {
             Log.Debug("Using the default sampling logic");
 
-            var env = span.GetTag(CoreTags.Env);
+            var env = span.GetTag(Tags.Env);
             var service = span.ServiceName;
 
             var key = $"service:{service},env:{env}";
