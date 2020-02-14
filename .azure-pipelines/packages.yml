@@ -34,6 +34,8 @@ jobs:
     inputs:
       preferBundledVersion: false
 
+  - pwsh: Write-Host "dd-trace-dotnet-${GitVersion.Sha} where GitVersion.Sha=${GitVersion.Sha}"
+
   - task: UseDotNet@2
     displayName: install dotnet core sdk
     inputs:
