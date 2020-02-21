@@ -1,0 +1,45 @@
+{
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:54571",
+      "sslPort": 0
+    }
+  },
+  "$schema": "http://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
+      "launchUrl": "api/postgres",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "POSTGRES_HOST": "localhost"
+      },
+      "use64Bit": true,
+      "nativeDebugging": true
+    },
+    "PostgresApi": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "api/postgres",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "POSTGRES_HOST": "localhost"
+      },
+      "nativeDebugging": true,
+      "applicationUrl": "http://localhost:54572"
+    },
+    "Docker": {
+      "commandName": "Docker",
+      "launchBrowser": true,
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/api/postgres",
+      "environmentVariables": {
+        "POSTGRES_HOST": "host.docker.internal"
+      },
+      "publishAllPorts": true,
+      "useSSL": true
+    }
+  }
+}

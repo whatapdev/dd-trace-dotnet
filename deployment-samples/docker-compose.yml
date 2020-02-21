@@ -1,0 +1,44 @@
+version: '3'
+services:
+  postgres:
+    image: postgres
+    environment:
+    - POSTGRES_USER=postgres
+    - POSTGRES_PASSWORD=postgres
+    - POSTGRES_DB=postgres
+    ports:
+    - "127.0.0.1:5432:5432"
+
+  PostgresApi-master:
+    image: apm-integrations-testing/handmade/dotnet_postgres_api/master-tracer
+    build:
+      context: ./
+      dockerfile: PostgresApi/Dockerfile
+      args:
+        TRACER_LOCATION: datadog-dotnet-apm_1.13.1_amd64.deb
+    ports:
+    - "8082:80"
+    environment:
+    - DD_AGENT_HOST=${DD_AGENT_HOST:-host.docker.internal}
+    - POSTGRES_HOST=postgres
+    - POSTGRES_USER=postgres
+    - POSTGRES_PASSWORD=postgres
+    depends_on:
+    - postgres
+
+  PostgresApi-latest:
+    image: ddzachmontoya/postgres-api:dd-trace-latest
+    build:
+      context: ./
+      dockerfile: PostgresApi/VisualStudio.dockerfile
+      args:
+        TRACER_VERSION: 1.12.0
+    ports:
+    - "8082:80"
+    environment:
+    - DD_AGENT_HOST=${DD_AGENT_HOST:-host.docker.internal}
+    - POSTGRES_HOST=postgres
+    - POSTGRES_USER=postgres
+    - POSTGRES_PASSWORD=postgres
+    depends_on:
+    - postgres
