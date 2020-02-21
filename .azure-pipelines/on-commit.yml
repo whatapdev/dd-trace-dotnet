@@ -1,0 +1,36 @@
+trigger:
+  branches:
+    include:
+      - '*'
+    exclude:
+      - refs/pull/*/head
+  paths:
+    exclude:
+      - docs/*
+      - .github/*
+
+variables:
+  buildConfiguration: Debug
+  packageFeed: /ffc32c57-3e0e-4e8f-8633-a7ad01df2e45
+
+stages:
+- stage: Build
+  displayName: Build
+  jobs:
+  - template: templates/jobs/build-managed.yml
+  - template: templates/jobs/build-native.yml
+
+# - stage: UnitTests
+#   dependsOn: Build
+
+# - stage: IntegrationTests
+#   dependsOn: UnitTests
+#   condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest')) # Only run on pull requests
+
+# - stage: Package
+#   dependsOn: UnitTests
+#   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')) # Do not run on pull requests
+
+# - steps: DeployContainers
+#   dependsOn: Package
+#   condition: and(succeeded(), or(eq(variables['Build.Reason'], 'Manual'), eq(variables['Build.Reason'], 'Schedule'))) # Only run when scheduled or manually triggered (i.e. no autoamtic CI)
