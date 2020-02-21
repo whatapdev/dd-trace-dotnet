@@ -17,8 +17,7 @@ stages:
 - stage: Build
   displayName: Build
   jobs:
-  - template: templates/jobs/build-managed.yml
-  - template: templates/jobs/build-native.yml
+  - template: templates/jobs/build.yml
 
 # - stage: UnitTests
 #   dependsOn: Build
