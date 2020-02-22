@@ -14,8 +14,6 @@ services:
     build:
       context: ./
       dockerfile: PostgresApi/Dockerfile
-      args:
-        TRACER_LOCATION: datadog-dotnet-apm_1.13.1_amd64.deb
     ports:
     - "8082:80"
     environment:
