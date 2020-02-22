@@ -166,7 +166,7 @@ jobs:
       artifactName: linux-packages
       targetPath: deploy/linux
   
-  - script: cp deploy/linux/* deployment-samples/artifacts
+  - script: mkdir -p deployment-samples/artifacts && cp deploy/linux/* deployment-samples/artifacts
 
   - task: Docker@2
     displayName: Login to Docker Registry
