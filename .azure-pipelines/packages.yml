@@ -182,13 +182,14 @@ jobs:
       Dockerfile: deployment-samples/PostgresApi/Dockerfile
       repository: apm-integrations-testing/handmade/dotnet_postgres_api/master-tracer
       arguments: --build-arg TRACER_LOCATION=artifacts/datadog-dotnet-apm_1.13.2_amd64.deb
+      tags: latest
 
   - task: DockerCompose@0
-    displayName: docker-compose build PostgresApi
+    displayName: docker-compose build PostgresApi-master
     inputs:
       dockerComposeFile: deployment-samples/docker-compose.yml
       containerregistrytype: Container Registry
-      dockerComposeCommand: build --build-arg TRACER_LOCATION="artifacts/datadog-dotnet-apm_1.13.2_amd64.deb" PostgresApi
+      dockerComposeCommand: build --build-arg TRACER_LOCATION="artifacts/datadog-dotnet-apm_1.13.2_amd64.deb" PostgresApi-master
 
 - job: linux_alpine_packages
 
