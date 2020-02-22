@@ -149,12 +149,14 @@ jobs:
   - task: DockerCompose@0
     displayName: docker-compose run Profiler
     inputs:
+      dockerComposeFile: docker-compose.yml
       containerregistrytype: Container Registry
       dockerComposeCommand: run Profiler
 
   - task: DockerCompose@0
     displayName: docker-compose run package
     inputs:
+      dockerComposeFile: docker-compose.yml
       containerregistrytype: Container Registry
       dockerComposeCommand: run package
 
@@ -226,12 +228,14 @@ jobs:
   - task: DockerCompose@0
     displayName: docker-compose run Profiler.Alpine
     inputs:
+      dockerComposeFile: docker-compose.yml
       containerregistrytype: Container Registry
       dockerComposeCommand: run Profiler.Alpine
 
   - task: DockerCompose@0
     displayName: docker-compose run package.alpine
     inputs:
+      dockerComposeFile: docker-compose.yml
       containerregistrytype: Container Registry
       dockerComposeCommand: run package.alpine
 
