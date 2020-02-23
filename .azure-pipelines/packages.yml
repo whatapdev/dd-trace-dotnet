@@ -172,8 +172,7 @@ jobs:
     displayName: Login to Docker Registry
     inputs:
       command: login
-      containerregistrytype: Container Registry
-      dockerRegistryEndpoint: Docker Registry
+      containerRegistry: Docker Registry
 
   # - task: Docker@2
   #   displayName: Build PostgresApi container
