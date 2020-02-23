@@ -190,7 +190,7 @@ jobs:
       dockerComposeFile: deployment-samples/docker-compose.yml
       containerregistrytype: Container Registry
       dockerRegistryEndpoint: Docker Registry
-      dockerComposeCommand: build --build-arg TRACER_LOCATION="artifacts/datadog-dotnet-apm_1.13.2_amd64.deb" PostgresApi-master
+      dockerComposeCommand: build --build-arg TRACER_LOCATION="artifacts/datadog-dotnet-apm_1.13.3_amd64.deb" PostgresApi-master
 
   - task: DockerCompose@0
     displayName: docker-compose push PostgresApi-master
