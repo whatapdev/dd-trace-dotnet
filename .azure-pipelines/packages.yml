@@ -208,7 +208,6 @@ jobs:
       Dockerfile: deployment-samples/PostgresApi/Dockerfile
       containerRegistry: Docker Registry
       repository: apm-integrations-testing/handmade/dotnet_postgres_api/master-tracer
-      arguments: --build-arg TRACER_LOCATION=artifacts/datadog-dotnet-apm_1.13.3_amd64.deb
       tags: latest
 
 - job: linux_alpine_packages
