@@ -1,5 +1,7 @@
 #if !NETSTANDARD2_0
 using System;
+using System.Linq;
+using System.Reflection;
 using System.Web;
 using Datadog.Trace.AspNet;
 using Datadog.Trace.ClrProfiler.Emit;
@@ -14,47 +16,51 @@ namespace Datadog.Trace.ClrProfiler.Integrations.AspNet
     {
         private const string IntegrationName = "AspNet";
         private const string OperationName = "aspnet.request";
-        private const string MinimumVersion = "4.0";
-        private const string MaximumVersion = "4";
+        private const string MinimumVersion = "1.0.0.0";
+        private const string MaximumVersion = "1.0.0.0";
 
-        private const string AssemblyName = "System.Web";
-        private const string BuildManagerTypeName = "System.Web.Compilation.BuildManager";
+        private const string AssemblyName = "Microsoft.Web.Infrastructure";
+        private const string BuildManagerTypeName = "Microsoft.Web.Infrastructure.DynamicModuleHelper.DynamicModuleUtility";
 
         private static readonly Vendors.Serilog.ILogger Log = DatadogLogging.GetLogger(typeof(AspNetIntegration));
 
+        private static bool registeredHttpModule = false;
+
         /// <summary>
-        /// Wrapper method used to instrument System.Web.Compilation.BuildManager.InvokePreStartInitMethods
+        /// Wrapper method used to instrument Microsoft.Web.Infrastructure.DynamicModuleHelper.DynamicModuleUtility.RegisterModule
         /// </summary>
-        /// <param name="methodInfoCollection">A collection of <see cref="System.Reflection.MethodInfo">objects.</see>/></param>
-        /// <param name="func">A parameter-less function that returns an <see cref="System.IDisposable">IDisposable</see>/> object.</param>
+        /// <param name="moduleType">The module type argument</param>
         /// <param name="opCode">The OpCode used in the original method call.</param>
         /// <param name="mdToken">The mdToken of the original method call.</param>
         /// <param name="moduleVersionPtr">A pointer to the module version GUID.</param>
         [InterceptMethod(
-            CallerAssembly = AssemblyName,
+            CallerAssembly = "System.Web.Optimization",
             TargetAssembly = AssemblyName,
             TargetType = BuildManagerTypeName,
-            TargetSignatureTypes = new[] { ClrNames.Void, "System.Collections.Generic.ICollection`1<System.Reflection.MethodInfo>", "System.Func`1<System.IDisposable>" },
+            TargetSignatureTypes = new[] { ClrNames.Void, "System.Type" },
             TargetMinimumVersion = MinimumVersion,
             TargetMaximumVersion = MaximumVersion)]
-        public static void InvokePreStartInitMethodsCore(
-            object methodInfoCollection,
-            object func,
+        public static void RegisterModule(
+            object moduleType,
             int opCode,
             int mdToken,
             long moduleVersionPtr)
         {
-            // The whole point of instrumenting a method so early on in the application load process
-            // is to register our HttpModule.
-            HttpApplication.RegisterModule(typeof(TracingHttpModule));
+            if (!registeredHttpModule)
+            {
+                // The whole point of instrumenting a method so early on in the application load process
+                // is to register our HttpModule.
+                HttpApplication.RegisterModule(typeof(TracingHttpModule));
+                registeredHttpModule = true;
+            }
 
-            Action<object, object> instrumentedMethod;
+            Action<object> instrumentedMethod;
             Type concreteType = null;
 
             try
             {
-                var module = ModuleLookup.GetByPointer(moduleVersionPtr);
-                concreteType = module.GetType(BuildManagerTypeName);
+                var targetAssembly = Assembly.Load("Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35");
+                concreteType = targetAssembly.GetType("Microsoft.Web.Infrastructure.DynamicModuleHelper.DynamicModuleUtility", throwOnError: true);
             }
             catch (Exception ex)
             {
@@ -64,7 +70,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations.AspNet
                     mdToken: mdToken,
                     opCode: opCode,
                     instrumentedType: BuildManagerTypeName,
-                    methodName: nameof(InvokePreStartInitMethodsCore),
+                    methodName: nameof(RegisterModule),
                     instanceType: null,
                     relevantArguments: new[] { concreteType?.AssemblyQualifiedName });
                 throw;
@@ -73,9 +79,9 @@ namespace Datadog.Trace.ClrProfiler.Integrations.AspNet
             try
             {
                 instrumentedMethod =
-                    MethodBuilder<Action<object, object>>
-                       .Start(moduleVersionPtr, mdToken, opCode, nameof(InvokePreStartInitMethodsCore))
-                       .WithParameters(methodInfoCollection, func)
+                    MethodBuilder<Action<object>>
+                       .Start(moduleVersionPtr, mdToken, opCode, nameof(RegisterModule))
+                       .WithParameters(moduleType)
                        .WithConcreteType(concreteType)
                        .Build();
             }
@@ -87,11 +93,11 @@ namespace Datadog.Trace.ClrProfiler.Integrations.AspNet
                     mdToken: mdToken,
                     opCode: opCode,
                     null,
-                    methodName: nameof(InvokePreStartInitMethodsCore));
+                    methodName: nameof(RegisterModule));
                 throw;
             }
 
-            instrumentedMethod(methodInfoCollection, func);
+            instrumentedMethod(moduleType);
         }
     }
 }
