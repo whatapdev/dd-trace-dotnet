@@ -10,4 +10,8 @@
     <Version>1.13.3-prerelease</Version>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Datadog.Trace.ClrProfiler.Managed.Utilities\Datadog.Trace.ClrProfiler.Managed.Utilities.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -311,6 +311,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNet461", "samples-aspnet
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNet461WithRedirects", "samples-aspnet\AspNet461WithRedirects\AspNet461WithRedirects.csproj", "{3AAB1B65-3253-4FFC-8D28-92814ED2F677}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Datadog.Trace.ClrProfiler.Managed.Utilities", "src\Datadog.Trace.ClrProfiler.Managed.Utilities\Datadog.Trace.ClrProfiler.Managed.Utilities.csproj", "{D95D5E26-F32A-481D-A15A-EF7B3B56D2E0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1133,6 +1135,18 @@ Global
 		{3AAB1B65-3253-4FFC-8D28-92814ED2F677}.Release|x64.Build.0 = Release|Any CPU
 		{3AAB1B65-3253-4FFC-8D28-92814ED2F677}.Release|x86.ActiveCfg = Release|Any CPU
 		{3AAB1B65-3253-4FFC-8D28-92814ED2F677}.Release|x86.Build.0 = Release|Any CPU
+		{D95D5E26-F32A-481D-A15A-EF7B3B56D2E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D95D5E26-F32A-481D-A15A-EF7B3B56D2E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D95D5E26-F32A-481D-A15A-EF7B3B56D2E0}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D95D5E26-F32A-481D-A15A-EF7B3B56D2E0}.Debug|x64.Build.0 = Debug|Any CPU
+		{D95D5E26-F32A-481D-A15A-EF7B3B56D2E0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D95D5E26-F32A-481D-A15A-EF7B3B56D2E0}.Debug|x86.Build.0 = Debug|Any CPU
+		{D95D5E26-F32A-481D-A15A-EF7B3B56D2E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D95D5E26-F32A-481D-A15A-EF7B3B56D2E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D95D5E26-F32A-481D-A15A-EF7B3B56D2E0}.Release|x64.ActiveCfg = Release|Any CPU
+		{D95D5E26-F32A-481D-A15A-EF7B3B56D2E0}.Release|x64.Build.0 = Release|Any CPU
+		{D95D5E26-F32A-481D-A15A-EF7B3B56D2E0}.Release|x86.ActiveCfg = Release|Any CPU
+		{D95D5E26-F32A-481D-A15A-EF7B3B56D2E0}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1215,6 +1229,7 @@ Global
 		{7E563BF6-47F2-4531-A1CE-FB9445DF3253} = {AA6F5582-3B71-49AC-AA39-8F7815AC46BE}
 		{46D36DB9-D4C7-415B-A805-FBC61D0612D1} = {65DF5743-B7B5-4BC8-8AB5-9DE596AF3FB8}
 		{3AAB1B65-3253-4FFC-8D28-92814ED2F677} = {65DF5743-B7B5-4BC8-8AB5-9DE596AF3FB8}
+		{D95D5E26-F32A-481D-A15A-EF7B3B56D2E0} = {9E5F0022-0A50-40BF-AC6A-C3078585ECAB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {160A1D00-1F5B-40F8-A155-621B4459D78F}
