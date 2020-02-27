@@ -4,28 +4,29 @@
     "method_replacements": [
       {
         "caller": {
-          "assembly": "System.Web.Optimization"
+          "assembly": "System.Web"
         },
         "target": {
-          "assembly": "Microsoft.Web.Infrastructure",
-          "type": "Microsoft.Web.Infrastructure.DynamicModuleHelper.DynamicModuleUtility",
-          "method": "RegisterModule",
+          "assembly": "System.Web",
+          "type": "System.Web.Compilation.BuildManager",
+          "method": "InvokePreStartInitMethodsCore",
           "signature_types": [
             "System.Void",
-            "System.Type"
+            "System.Collections.Generic.ICollection`1<System.Reflection.MethodInfo>",
+            "System.Func`1<System.IDisposable>"
           ],
-          "minimum_major": 1,
+          "minimum_major": 4,
           "minimum_minor": 0,
           "minimum_patch": 0,
-          "maximum_major": 1,
+          "maximum_major": 4,
           "maximum_minor": 65535,
           "maximum_patch": 65535
         },
         "wrapper": {
           "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.13.3.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
           "type": "Datadog.Trace.ClrProfiler.Integrations.AspNet.AspNetIntegration",
-          "method": "RegisterModule",
-          "signature": "00 04 01 1C 08 08 0A"
+          "method": "InvokePreStartInitMethodsCore",
+          "signature": "00 05 01 1C 1C 08 08 0A"
         }
       }
     ]
