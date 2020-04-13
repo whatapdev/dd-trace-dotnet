@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -19,6 +20,8 @@ namespace Samples.HttpMessageHandler
         private static string Url;
 
 #if NETFRAMEWORK
+        // On .NET Framework, tell the runtime to load assemblies from the GAC domain-neutral.
+        // In this sample, this will affect System and System.Net.Http
         [LoaderOptimization(LoaderOptimization.MultiDomainHost)]
 #endif
         public static void Main(string[] args)
@@ -54,7 +57,7 @@ namespace Samples.HttpMessageHandler
                     // send an http request using HttpClient
                     Console.WriteLine();
                     Console.WriteLine("Sending request with HttpClient.");
-                    SendHttpClientRequestAsync(tracingDisabled).GetAwaiter().GetResult();
+                    HttpClientHelpers.SendHttpClientRequestsAsync(tracingDisabled, Url, RequestContent).GetAwaiter().GetResult();
                 }
 
                 if (args.Length == 0 || args.Any(arg => arg.Equals("WebClient", StringComparison.OrdinalIgnoreCase)))
@@ -62,7 +65,7 @@ namespace Samples.HttpMessageHandler
                     // send an http request using WebClient
                     Console.WriteLine();
                     Console.WriteLine("Sending request with WebClient.");
-                    SendWebClientRequest(tracingDisabled);
+                    WebClientHelpers.SendWebClientsRequest(tracingDisabled, Url, RequestContent);
                 }
 
                 Console.WriteLine();
@@ -74,85 +77,6 @@ namespace Samples.HttpMessageHandler
             // Apparently listener.GetContext() doesn't throw an exception if listener.Stop() is called,
             // like it does in .NET Framework.
             Environment.Exit(0);
-        }
-
-        private static async Task SendHttpClientRequestAsync(bool tracingDisabled)
-        {
-            // Insert a call to the Tracer.Instance to include an AssemblyRef to Datadog.Trace assembly in the final executable
-            var ins = Tracer.Instance;
-
-            Console.WriteLine($"[HttpClient] sending request to {Url}");
-            var clientRequestContent = new StringContent(RequestContent, Utf8);
-
-            using (var client = new HttpClient())
-            {
-                if (tracingDisabled)
-                {
-                    client.DefaultRequestHeaders.Add(HttpHeaderNames.TracingEnabled, "false");
-                }
-
-                using (var responseMessage = await client.PostAsync(Url, clientRequestContent))
-                {
-                    // read response content and headers
-                    var responseContent = await responseMessage.Content.ReadAsStringAsync();
-                    Console.WriteLine($"[HttpClient] response content: {responseContent}");
-
-                    foreach (var header in responseMessage.Headers)
-                    {
-                        var name = header.Key;
-                        var values = string.Join(",", header.Value);
-                        Console.WriteLine($"[HttpClient] response header: {name}={values}");
-                    }
-                }
-            }
-
-#if NETCOREAPP
-            using (var client = new HttpClient(new SocketsHttpHandler()))
-            {
-                if (tracingDisabled)
-                {
-                    client.DefaultRequestHeaders.Add(HttpHeaderNames.TracingEnabled, "false");
-                }
-
-                using (var responseMessage = await client.PostAsync(Url, clientRequestContent))
-                {
-                    // read response content and headers
-                    var responseContent = await responseMessage.Content.ReadAsStringAsync();
-                    Console.WriteLine($"[HttpClient] response content: {responseContent}");
-
-                    foreach (var header in responseMessage.Headers)
-                    {
-                        var name = header.Key;
-                        var values = string.Join(",", header.Value);
-                        Console.WriteLine($"[HttpClient] response header: {name}={values}");
-                    }
-                }
-            }
-#endif
-        }
-
-        private static void SendWebClientRequest(bool tracingDisabled)
-        {
-            Console.WriteLine($"[WebClient] sending request to {Url}");
-
-            using (var webClient = new WebClient())
-            {
-                webClient.Encoding = Utf8;
-
-                if (tracingDisabled)
-                {
-                    webClient.Headers.Add(HttpHeaderNames.TracingEnabled, "false");
-                }
-
-                var responseContent = webClient.DownloadString(Url);
-                Console.WriteLine($"[WebClient] response content: {responseContent}");
-
-                foreach (string headerName in webClient.ResponseHeaders)
-                {
-                    string headerValue = webClient.ResponseHeaders[headerName];
-                    Console.WriteLine($"[WebClient] response header: {headerName}={headerValue}");
-                }
-            }
         }
 
         private static void HandleHttpRequests(object state)
