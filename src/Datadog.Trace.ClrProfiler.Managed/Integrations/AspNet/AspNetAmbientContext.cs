@@ -119,7 +119,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
         /// <summary>
         /// Gets the root span for this web request.
         /// </summary>
-        internal Span RootSpan => _rootScope?.Span;
+        internal AbstractSpan RootSpan => _rootScope?.Span;
 
         /// <summary>
         /// Gets a value indicating whether this context should be registered.

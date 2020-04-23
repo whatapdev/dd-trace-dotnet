@@ -1,3 +1,5 @@
+using System;
+
 namespace Datadog.Trace
 {
     /// <summary>
@@ -22,7 +24,7 @@ namespace Datadog.Trace
         public const string InstrumentedMethod = "instrumented.method";
 
         /// <summary>
-        /// The kind of span (e.g. client, server). Not to be confused with <see cref="Span.Type"/>.
+        /// The kind of span (e.g. client, server). Not to be confused with <see cref="AbstractSpan.Type"/>.
         /// </summary>
         public const string SpanKind = "span.kind";
 
@@ -45,6 +47,18 @@ namespace Datadog.Trace
         /// Language tag, applied to root spans that are .NET runtime (e.g., ASP.NET)
         /// </summary>
         public const string Language = "language";
+
+        /// <summary>
+        /// Obsolete. Use <see cref="ManualKeep"/>.
+        /// </summary>
+        [Obsolete("This field will be removed in futures versions of this library. Use ManualKeep instead.")]
+        public const string ForceKeep = "force.keep";
+
+        /// <summary>
+        /// Obsolete. Use <see cref="ManualDrop"/>.
+        /// </summary>
+        [Obsolete("This field will be removed in futures versions of this library. Use ManualDrop instead.")]
+        public const string ForceDrop = "force.drop";
 
         /// <summary>
         /// A user-friendly tag that sets the sampling priority to <see cref="Trace.SamplingPriority.UserKeep"/>.

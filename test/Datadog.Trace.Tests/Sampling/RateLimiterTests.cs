@@ -18,7 +18,7 @@ namespace Datadog.Trace.Tests.Sampling
         {
             var traceContext = new TraceContext(Tracer.Instance);
             var spanContext = new SpanContext(null, traceContext, "Weeeee");
-            var span = new Span(spanContext, null);
+            var span = new AbstractSpan(spanContext, null);
             var rateLimiter = new RateLimiter(maxTracesPerInterval: null);
             var allowed = rateLimiter.Allowed(span);
             Assert.True(allowed);
@@ -108,7 +108,7 @@ namespace Datadog.Trace.Tests.Sampling
         {
             var traceContext = new TraceContext(Tracer.Instance);
             var spanContext = new SpanContext(null, traceContext, "Weeeee");
-            var span = new Span(spanContext, null);
+            var span = new AbstractSpan(spanContext, null);
 
             var remaining = howManyTimes;
             var allowedCount = 0;
@@ -163,7 +163,7 @@ namespace Datadog.Trace.Tests.Sampling
                                            Interlocked.Decrement(ref remaining);
 
                                            var spanContext = new SpanContext(null, traceContext, "Weeeee");
-                                           var span = new Span(spanContext, null);
+                                           var span = new AbstractSpan(spanContext, null);
 
                                            if (limiter.Allowed(span))
                                            {

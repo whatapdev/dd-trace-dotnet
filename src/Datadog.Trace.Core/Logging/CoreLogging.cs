@@ -2,7 +2,7 @@ using System;
 
 namespace Datadog.Trace
 {
-    internal static class CoreLogStrategy
+    internal static class CoreLogging
     {
         private static Func<Type, ICoreLogger> _strategy = null;
 

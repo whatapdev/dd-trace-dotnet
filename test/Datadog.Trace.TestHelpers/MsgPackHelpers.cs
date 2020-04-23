@@ -69,7 +69,7 @@ namespace Datadog.Trace.TestHelpers
             return obj.FirstDictionary()["meta"].AsDictionary().ToDictionary(kv => kv.Key.AsString(), kv => kv.Value.AsString());
         }
 
-        public static void AssertSpanEqual(Span expected, MessagePackObject actual)
+        public static void AssertSpanEqual(AbstractSpan expected, MessagePackObject actual)
         {
             Assert.Equal(expected.Context.TraceId, actual.TraceId());
             Assert.Equal(expected.Context.SpanId, actual.SpanId());

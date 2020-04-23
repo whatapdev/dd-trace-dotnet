@@ -464,7 +464,7 @@ namespace Datadog.Trace
 
                 if (_isProcessManager)
                 {
-
+                    InitializePortFileWatcher();
                 }
                 else
                 {

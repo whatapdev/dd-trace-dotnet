@@ -4,8 +4,6 @@ using System.Globalization;
 using System.Text;
 using Datadog.Trace.Abstractions;
 using Datadog.Trace.ExtensionMethods;
-using Datadog.Trace.Logging;
-using Datadog.Trace.Vendors.Serilog.Events;
 
 namespace Datadog.Trace
 {
@@ -15,22 +13,23 @@ namespace Datadog.Trace
     /// tracks the duration of an operation as well as associated metadata in
     /// the form of a resource name, a service name, and user defined tags.
     /// </summary>
-    public abstract class SpanBase : IDisposable, ISpan
+    public abstract class AbstractSpan : IDisposable, ISpan
     {
-        private static readonly ICoreLogger Log = null;
-        private static readonly bool IsLogLevelDebugEnabled = false;
+        private static ICoreLogger _log = null;
+        private static bool _isLogLevelDebugEnabled = false;
 
         private readonly object _lock = new object();
         private readonly object _tagsLock = new object();
         private readonly object _metricLock = new object();
 
-        internal SpanBase(SpanContext context, DateTimeOffset? start, ICoreLogger log) : base(context, start)
+        internal AbstractSpan(SpanContext context, DateTimeOffset? start, ICoreLogger log)
+            : this(context, start)
         {
-			Log = log;
-			IsLogLevelDebugEnabled = Log?.IsEnabled(LogEventLevel.Debug);
+            _log = _log ?? log;
+            _isLogLevelDebugEnabled = _log?.IsEnabled(LogEventLevel.Debug) ?? false;
         }
-		
-        internal SpanBase(SpanContext context, DateTimeOffset? start)
+
+        internal AbstractSpan(SpanContext context, DateTimeOffset? start)
         {
             Context = context;
             ServiceName = context.ServiceName;
@@ -51,7 +50,6 @@ namespace Datadog.Trace
         /// Gets or sets the type of request this span represents (ex: web, db).
         /// Not to be confused with span kind.
         /// </summary>
-        /// <seealso cref="SpanTypes"/>
         public string Type { get; set; }
 
         /// <summary>
@@ -148,12 +146,12 @@ namespace Datadog.Trace
         /// <param name="key">The tag's key.</param>
         /// <param name="value">The tag's value.</param>
         /// <returns>This span to allow method chaining.</returns>
-        public Span SetTag(string key, string value)
+        public AbstractSpan SetTag(string key, string value)
         {
             // some tags have special meaning
             switch (key)
             {
-                case Trace.Tags.SamplingPriority:
+                case Trace.CoreTags.SamplingPriority:
                     if (Enum.TryParse(value, out SamplingPriority samplingPriority) &&
                         Enum.IsDefined(typeof(SamplingPriority), samplingPriority))
                     {
@@ -163,8 +161,8 @@ namespace Datadog.Trace
 
                     break;
 #pragma warning disable CS0618 // Type or member is obsolete
-                case Trace.Tags.ForceKeep:
-                case Trace.Tags.ManualKeep:
+                case Trace.CoreTags.ForceKeep:
+                case Trace.CoreTags.ManualKeep:
                     if (value.ToBoolean() ?? false)
                     {
                         // user-friendly tag to set UserKeep priority
@@ -172,8 +170,8 @@ namespace Datadog.Trace
                     }
 
                     break;
-                case Trace.Tags.ForceDrop:
-                case Trace.Tags.ManualDrop:
+                case Trace.CoreTags.ForceDrop:
+                case Trace.CoreTags.ManualDrop:
                     if (value.ToBoolean() ?? false)
                     {
                         // user-friendly tag to set UserReject priority
@@ -182,7 +180,7 @@ namespace Datadog.Trace
 
                     break;
 #pragma warning restore CS0618 // Type or member is obsolete
-                case Trace.Tags.Analytics:
+                case Trace.CoreTags.Analytics:
                     // value is a string and can represent a bool ("true") or a double ("0.5"),
                     // so try to parse both.
                     // note that "1" and "0" can parse as either type,
@@ -192,12 +190,12 @@ namespace Datadog.Trace
                     if (boolean == true)
                     {
                         // always sample
-                        SetMetric(Trace.Tags.Analytics, 1.0);
+                        SetMetric(Trace.CoreTags.Analytics, 1.0);
                     }
                     else if (boolean == false)
                     {
                         // never sample
-                        SetMetric(Trace.Tags.Analytics, 0.0);
+                        SetMetric(Trace.CoreTags.Analytics, 0.0);
                     }
                     else if (double.TryParse(
                         value,
@@ -206,11 +204,11 @@ namespace Datadog.Trace
                         out double analyticsSampleRate))
                     {
                         // use specified sample rate
-                        SetMetric(Trace.Tags.Analytics, analyticsSampleRate);
+                        SetMetric(Trace.CoreTags.Analytics, analyticsSampleRate);
                     }
                     else
                     {
-                        Log?.Warning("Value {0} has incorrect format for tag {1}", value, Trace.Tags.Analytics);
+                        _log?.Warning("Value {0} has incorrect format for tag {1}", value, Trace.CoreTags.Analytics);
                     }
 
                     break;
@@ -298,9 +296,9 @@ namespace Datadog.Trace
             {
                 Context.TraceContext.CloseSpan(this);
 
-                if (IsLogLevelDebugEnabled)
+                if (_isLogLevelDebugEnabled)
                 {
-                    Log?.Debug(
+                    _log?.Debug(
                         "Span closed: [s_id: {0}, p_id: {1}, t_id: {2}] for (Service: {3}, Resource: {4}, Operation: {5}, Tags: [{6}])",
                         SpanId,
                         Context.ParentId,
@@ -340,9 +338,9 @@ namespace Datadog.Trace
                     exception = aggregateException.InnerExceptions[0];
                 }
 
-                SetTag(Trace.Tags.ErrorMsg, exception.Message);
-                SetTag(Trace.Tags.ErrorStack, exception.ToString());
-                SetTag(Trace.Tags.ErrorType, exception.GetType().ToString());
+                SetTag(Trace.CoreTags.ErrorMsg, exception.Message);
+                SetTag(Trace.CoreTags.ErrorStack, exception.ToString());
+                SetTag(Trace.CoreTags.ErrorType, exception.GetType().ToString());
             }
         }
 
@@ -369,7 +367,7 @@ namespace Datadog.Trace
             return Metrics != null && Metrics.TryGetValue(key, out double value) ? value : default;
         }
 
-        internal Span SetMetric(string key, double? value)
+        internal AbstractSpan SetMetric(string key, double? value)
         {
             if (value == null)
             {

@@ -54,7 +54,7 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
         [Fact]
         public void Lookup_DatadogTrace_Succeeds()
         {
-            var expectedModule = typeof(Span).Assembly.ManifestModule;
+            var expectedModule = typeof(AbstractSpan).Assembly.ManifestModule;
             var lookup = ModuleLookup.Get(expectedModule.ModuleVersionId);
             Assert.Equal(expectedModule, lookup);
         }

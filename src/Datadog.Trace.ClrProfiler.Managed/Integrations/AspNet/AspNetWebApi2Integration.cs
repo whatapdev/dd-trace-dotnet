@@ -178,7 +178,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
             return scope;
         }
 
-        private static void UpdateSpan(dynamic controllerContext, Span span)
+        private static void UpdateSpan(dynamic controllerContext, AbstractSpan span)
         {
             try
             {

@@ -38,7 +38,7 @@ namespace Datadog.Trace.Tests
 
             span.SetTag(key, value);
 
-            _writerMock.Verify(x => x.WriteTrace(It.IsAny<Span[]>()), Times.Never);
+            _writerMock.Verify(x => x.WriteTrace(It.IsAny<AbstractSpan[]>()), Times.Never);
             Assert.Equal(span.GetTag(key), value);
         }
 
@@ -61,7 +61,7 @@ namespace Datadog.Trace.Tests
             await Task.Delay(TimeSpan.FromMilliseconds(1));
             span.Finish();
 
-            _writerMock.Verify(x => x.WriteTrace(It.IsAny<Span[]>()), Times.Once);
+            _writerMock.Verify(x => x.WriteTrace(It.IsAny<AbstractSpan[]>()), Times.Once);
             Assert.True(span.Duration > TimeSpan.Zero);
         }
 
@@ -100,7 +100,7 @@ namespace Datadog.Trace.Tests
             const int maxDifference = 15;
             TimeSpan totalStopwatchTime = TimeSpan.Zero;
             TimeSpan totalSpanTime = TimeSpan.Zero;
-            Span span;
+            AbstractSpan span;
             var stopwatch = new Stopwatch();
 
             // execute once to ensure JIT compilation
