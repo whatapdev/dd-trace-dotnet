@@ -105,15 +105,12 @@ namespace Datadog.Trace
                     return;
                 }
 
-                var traceAgentDirectory = Path.GetDirectoryName(TraceAgentMetadata.ProcessPath);
-
-                if (!Directory.Exists(traceAgentDirectory))
+                if (GetTraceAgentDirectory(out var traceAgentDirectory))
                 {
-                    Log.Warning("Directory for trace agent does not exist: {0}", traceAgentDirectory);
                     return;
                 }
 
-                InitializePortManagerClaimFiles(traceAgentDirectory);
+                ForceRefreshPortManagerClaimFiles(traceAgentDirectory);
                 _cancellationTokenSource = new CancellationTokenSource();
 
                 if (_isProcessManager)
@@ -137,7 +134,20 @@ namespace Datadog.Trace
             }
         }
 
-        private static void InitializePortManagerClaimFiles(string traceAgentDirectory)
+        private static bool GetTraceAgentDirectory(out string traceAgentDirectory)
+        {
+            traceAgentDirectory = Path.GetDirectoryName(TraceAgentMetadata.ProcessPath);
+
+            if (!Directory.Exists(traceAgentDirectory))
+            {
+                Log.Warning("Directory for trace agent does not exist: {0}", traceAgentDirectory);
+                return true;
+            }
+
+            return false;
+        }
+
+        private static void ForceRefreshPortManagerClaimFiles(string traceAgentDirectory)
         {
             var portManagerDirectory = Path.Combine(traceAgentDirectory, "port-manager");
 
@@ -439,7 +449,7 @@ namespace Datadog.Trace
                 _portFileWatcher.EnableRaisingEvents = true;
             }
 
-            public void ForcePortFileRead()
+            public void ForcePortRefresh()
             {
                 if (KeepAliveTask == null)
                 {
@@ -447,7 +457,19 @@ namespace Datadog.Trace
                     return;
                 }
 
-                ReadPortAndAlertSubscribers();
+                if (!_isProcessManager && GetTraceAgentDirectory(out var traceAgentDirectory))
+                {
+                    ForceRefreshPortManagerClaimFiles(traceAgentDirectory);
+                }
+
+                if (_isProcessManager)
+                {
+
+                }
+                else
+                {
+                    ReadPortAndAlertSubscribers();
+                }
             }
 
             private void OnPortFileChanged(object source, FileSystemEventArgs e)
