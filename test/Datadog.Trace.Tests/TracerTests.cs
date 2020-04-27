@@ -296,7 +296,7 @@ namespace Datadog.Trace.Tests
             // so create a new one after setting the env var
             Environment.SetEnvironmentVariable(name, env);
             var tracer = new Tracer();
-            AbstractSpan span = tracer.StartSpan("operation");
+            Span span = tracer.StartSpan("operation");
 
             Assert.Equal(env, span.GetTag(Tags.Env));
 
@@ -323,7 +323,7 @@ namespace Datadog.Trace.Tests
             Environment.SetEnvironmentVariable(name, envServiceName);
 
             var tracer = Tracer.Create(defaultServiceName: tracerServiceName);
-            AbstractSpan span = tracer.StartSpan("operationName", serviceName: spanServiceName);
+            Span span = tracer.StartSpan("operationName", serviceName: spanServiceName);
 
             if (expectedServiceName == null)
             {

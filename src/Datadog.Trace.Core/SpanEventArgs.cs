@@ -12,8 +12,8 @@ namespace Datadog.Trace
         /// Creates a new <see cref="SpanEventArgs"/> using <paramref name="span"/>
         /// </summary>
         /// <param name="span">The <see cref="Span"/> used to initialize the <see cref="SpanEventArgs"/> object.</param>
-        public SpanEventArgs(AbstractSpan span) => Span = span;
+        public SpanEventArgs(Span span) => Span = span;
 
-        internal AbstractSpan Span { get; }
+        internal Span Span { get; }
     }
 }

@@ -1,5 +1,4 @@
 using System;
-using Datadog.Trace.Logging;
 
 namespace Datadog.Trace
 {
@@ -17,7 +16,7 @@ namespace Datadog.Trace
 
         public abstract Scope Active { get; protected set; }
 
-        public Scope Activate(AbstractSpan span, bool finishOnClose)
+        public Scope Activate(Span span, bool finishOnClose)
         {
             var newParent = Active;
             var scope = new Scope(newParent, span, this, finishOnClose);

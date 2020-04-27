@@ -10,11 +10,11 @@ namespace Datadog.Trace.Tests.Sampling
     public class CustomSamplingRuleTests
     {
         private static readonly ulong Id = 1;
-        private static readonly AbstractSpan CartCheckoutSpan = new AbstractSpan(new SpanContext(Id++, Id++, null, serviceName: "shopping-cart-service"), DateTimeOffset.Now) { OperationName = "checkout" };
-        private static readonly AbstractSpan AddToCartSpan = new AbstractSpan(new SpanContext(Id++, Id++, null, serviceName: "shopping-cart-service"), DateTimeOffset.Now) { OperationName = "cart-add" };
-        private static readonly AbstractSpan ShippingAuthSpan = new AbstractSpan(new SpanContext(Id++, Id++, null, serviceName: "shipping-auth-service"), DateTimeOffset.Now) { OperationName = "authorize" };
-        private static readonly AbstractSpan ShippingRevertSpan = new AbstractSpan(new SpanContext(Id++, Id++, null, serviceName: "shipping-auth-service"), DateTimeOffset.Now) { OperationName = "authorize-revert" };
-        private static readonly AbstractSpan RequestShippingSpan = new AbstractSpan(new SpanContext(Id++, Id++, null, serviceName: "request-shipping"), DateTimeOffset.Now) { OperationName = "submit" };
+        private static readonly Span CartCheckoutSpan = new SpanImplementation(new SpanContext(Id++, Id++, null, serviceName: "shopping-cart-service"), DateTimeOffset.Now) { OperationName = "checkout" };
+        private static readonly Span AddToCartSpan = new SpanImplementation(new SpanContext(Id++, Id++, null, serviceName: "shopping-cart-service"), DateTimeOffset.Now) { OperationName = "cart-add" };
+        private static readonly Span ShippingAuthSpan = new SpanImplementation(new SpanContext(Id++, Id++, null, serviceName: "shipping-auth-service"), DateTimeOffset.Now) { OperationName = "authorize" };
+        private static readonly Span ShippingRevertSpan = new SpanImplementation(new SpanContext(Id++, Id++, null, serviceName: "shipping-auth-service"), DateTimeOffset.Now) { OperationName = "authorize-revert" };
+        private static readonly Span RequestShippingSpan = new SpanImplementation(new SpanContext(Id++, Id++, null, serviceName: "request-shipping"), DateTimeOffset.Now) { OperationName = "submit" };
 
         [Fact]
         public void Constructs_ZeroRateOnly_From_Config_String()
@@ -110,13 +110,13 @@ namespace Datadog.Trace.Tests.Sampling
             Assert.Equal(expected: expectedRate, actual: rule.GetSamplingRate(CartCheckoutSpan));
         }
 
-        private void VerifySingleRule(string config, AbstractSpan span, bool isMatch)
+        private void VerifySingleRule(string config, Span span, bool isMatch)
         {
             var rule = CustomSamplingRule.BuildFromConfigurationString(config).Single();
             VerifySingleRule(rule, span, isMatch);
         }
 
-        private void VerifySingleRule(ISamplingRule rule, AbstractSpan span, bool isMatch)
+        private void VerifySingleRule(ISamplingRule rule, Span span, bool isMatch)
         {
             Assert.Equal(rule.IsMatch(span), isMatch);
         }

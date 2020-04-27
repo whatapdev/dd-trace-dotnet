@@ -234,7 +234,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
             }
         }
 
-        private static void DecorateSpan(AbstractSpan span)
+        private static void DecorateSpan(Span span)
         {
             span.Type = SpanTypes.GraphQL;
             span.SetTag(Tags.SpanKind, SpanKinds.Server);
@@ -321,7 +321,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
             return scope;
         }
 
-        private static void RecordExecutionErrorsIfPresent(AbstractSpan span, string errorType, object executionErrors)
+        private static void RecordExecutionErrorsIfPresent(Span span, string errorType, object executionErrors)
         {
             var errorCount = executionErrors.GetProperty<int>("Count").GetValueOrDefault();
 

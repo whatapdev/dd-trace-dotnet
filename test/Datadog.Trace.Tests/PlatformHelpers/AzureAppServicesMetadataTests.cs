@@ -72,8 +72,8 @@ namespace Datadog.Trace.Tests.PlatformHelpers
             var vars = GetMockVariables(SubscriptionId, DeploymentId, PlanResourceGroup, SiteResourceGroup);
             AzureAppServices.Metadata = new AzureAppServices(vars);
             var tracer = new Tracer();
-            var rootSpans = new List<AbstractSpan>();
-            var nonRootSpans = new List<AbstractSpan>();
+            var rootSpans = new List<Span>();
+            var nonRootSpans = new List<Span>();
             var iterations = 5;
             var remaining = iterations;
 

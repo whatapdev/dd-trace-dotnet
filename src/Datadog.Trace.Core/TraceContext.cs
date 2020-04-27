@@ -7,26 +7,26 @@ namespace Datadog.Trace
     internal class TraceContext : ITraceContext
     {
         private static readonly ICoreLogger Log = CoreLogging.For<TraceContext>();
-        private static Action<AbstractSpan> _decorateRootSpan = null;
+        private static Action<Span> _decorateRootSpan = null;
 
         private readonly DateTimeOffset _utcStart = DateTimeOffset.UtcNow;
         private readonly Stopwatch _stopwatch = Stopwatch.StartNew();
-        private readonly List<AbstractSpan> _spans = new List<AbstractSpan>();
+        private readonly List<Span> _spans = new List<Span>();
 
-        private readonly Action<AbstractSpan[]> _submit = null;
-        private readonly Func<AbstractSpan, SamplingPriority> _getSamplingPriority;
+        private readonly Action<Span[]> _submit = null;
+        private readonly Func<Span, SamplingPriority> _getSamplingPriority;
 
         private int _openSpans;
         private SamplingPriority? _samplingPriority;
         private bool _samplingPriorityLocked;
 
-        public TraceContext(Action<AbstractSpan[]> submit, Func<AbstractSpan, SamplingPriority> getSamplingPriority)
+        public TraceContext(Action<Span[]> submit, Func<Span, SamplingPriority> getSamplingPriority)
         {
             _submit = submit;
             _getSamplingPriority = getSamplingPriority;
         }
 
-        public AbstractSpan RootSpan { get; private set; }
+        public Span RootSpan { get; private set; }
 
         public DateTimeOffset UtcNow => _utcStart.Add(_stopwatch.Elapsed);
 
@@ -49,12 +49,12 @@ namespace Datadog.Trace
             }
         }
 
-        public static void SetRootSpanDecorator(Action<AbstractSpan> spanDecorator)
+        public static void SetRootSpanDecorator(Action<Span> spanDecorator)
         {
             _decorateRootSpan = _decorateRootSpan ?? spanDecorator;
         }
 
-        public void AddSpan(AbstractSpan span)
+        public void AddSpan(Span span)
         {
             lock (_spans)
             {
@@ -77,8 +77,7 @@ namespace Datadog.Trace
                         {
                             // this is a local root span (i.e. not propagated).
                             // determine an initial sampling priority for this trace, but don't lock it yet
-                            _samplingPriority =
-                                Tracer.Sampler?.GetSamplingPriority(RootSpan);
+                            _samplingPriority = _getSamplingPriority(RootSpan);
                         }
                     }
                 }
@@ -88,7 +87,7 @@ namespace Datadog.Trace
             }
         }
 
-        public void CloseSpan(AbstractSpan span)
+        public void CloseSpan(Span span)
         {
             if (span == RootSpan)
             {
@@ -105,7 +104,7 @@ namespace Datadog.Trace
                 }
             }
 
-            AbstractSpan[] spansToWrite = null;
+            Span[] spansToWrite = null;
 
             lock (_spans)
             {
@@ -136,9 +135,9 @@ namespace Datadog.Trace
             }
         }
 
-        private static void DecorateRootSpan(AbstractSpan span)
+        private static void DecorateRootSpan(Span span)
         {
-            if ()
+            _decorateRootSpan?.Invoke(span);
         }
     }
 }

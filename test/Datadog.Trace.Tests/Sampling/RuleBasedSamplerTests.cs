@@ -77,9 +77,9 @@ namespace Datadog.Trace.Tests.Sampling
                 0.05f);
         }
 
-        private static AbstractSpan GetMyServiceSpan()
+        private static Span GetMyServiceSpan()
         {
-            var span = new AbstractSpan(new SpanContext(_id++, _id++, null, serviceName: ServiceName), DateTimeOffset.Now) { OperationName = OperationName };
+            var span = new SpanImplementation(new SpanContext(_id++, _id++, null, serviceName: ServiceName), DateTimeOffset.Now) { OperationName = OperationName };
             span.SetTag(Tags.Env, Env);
             return span;
         }
@@ -114,7 +114,7 @@ namespace Datadog.Trace.Tests.Sampling
 
         private class NoLimits : IRateLimiter
         {
-            public bool Allowed(AbstractSpan span)
+            public bool Allowed(Span span)
             {
                 return true;
             }
@@ -127,7 +127,7 @@ namespace Datadog.Trace.Tests.Sampling
 
         private class DenyAll : IRateLimiter
         {
-            public bool Allowed(AbstractSpan span)
+            public bool Allowed(Span span)
             {
                 return false;
             }

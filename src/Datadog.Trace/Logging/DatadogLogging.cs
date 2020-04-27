@@ -65,11 +65,10 @@ namespace Datadog.Trace.Logging
                 try
                 {
                     var currentAppDomain = AppDomain.CurrentDomain;
-                    loggerConfiguration.Enrich.WithProperty("MName", currentProcess.MachineName);
-                    loggerConfiguration.Enrich.WithProperty("PName", currentProcess.ProcessName);
+                    loggerConfiguration.Enrich.WithProperty("MachineName", currentProcess.MachineName);
+                    loggerConfiguration.Enrich.WithProperty("ProcessName", currentProcess.ProcessName);
                     loggerConfiguration.Enrich.WithProperty("PID", currentProcess.Id);
-                    loggerConfiguration.Enrich.WithProperty("ADName", currentAppDomain.FriendlyName);
-                    loggerConfiguration.Enrich.WithProperty("ADId", currentAppDomain.Id);
+                    loggerConfiguration.Enrich.WithProperty("AppDomainName", currentAppDomain.FriendlyName);
                 }
                 catch
                 {
