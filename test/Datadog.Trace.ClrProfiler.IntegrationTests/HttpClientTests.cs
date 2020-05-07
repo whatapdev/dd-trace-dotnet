@@ -45,7 +45,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
                     Assert.Equal(expectedOperationName, span.Name);
                     Assert.Equal(expectedServiceName, span.Service);
                     Assert.Equal(SpanTypes.Http, span.Type);
-                    Assert.Equal("HttpMessageInvoker", span.Tags[Tags.InstrumentationName]);
+                    Assert.Equal("HttpMessageHandler", span.Tags[Tags.InstrumentationName]);
                 }
 
                 var firstSpan = spans.First();
