@@ -145,7 +145,8 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                     resourceName: requestMessage.Headers.Action ?? requestMessage.Headers.To?.LocalPath,
                     httpMethod,
                     host,
-                    httpUrl: requestMessage.Headers.To?.AbsoluteUri);
+                    httpUrl: requestMessage.Headers.To?.AbsoluteUri,
+                    tracer.Settings.ServiceVersion);
 
                 // set analytics sample rate if enabled
                 var analyticsSampleRate = tracer.Settings.GetIntegrationAnalyticsSampleRate(IntegrationName, enabledWithGlobalSetting: true);

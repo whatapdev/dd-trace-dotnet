@@ -91,7 +91,8 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                     resourceName: resourceName,
                     method: httpMethod,
                     host: host,
-                    httpUrl: absoluteUri);
+                    httpUrl: absoluteUri,
+                    Tracer.Settings.ServiceVersion);
 
                 var statusCode = response.GetProperty<int>("StatusCode");
 

@@ -124,7 +124,7 @@ namespace Datadog.Trace.AspNet
                 string resourceName = $"{httpMethod} {path.ToLowerInvariant()}";
 
                 scope = tracer.StartActive(_requestOperationName, propagatedContext);
-                scope.Span.DecorateWebServerSpan(resourceName, httpMethod, host, url);
+                scope.Span.DecorateWebServerSpan(resourceName, httpMethod, host, url, tracer.Settings.ServiceVersion);
 
                 // set analytics sample rate if enabled
                 var analyticsSampleRate = tracer.Settings.GetIntegrationAnalyticsSampleRate(IntegrationName, enabledWithGlobalSetting: true);

@@ -104,7 +104,9 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                 throw;
             }
 
-            using (Scope scope = CreateScope(controllerContext))
+            var tracer = Tracer.Instance;
+
+            using (Scope scope = CreateScope(tracer, controllerContext))
             {
                 try
                 {
@@ -114,7 +116,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                     if (scope != null)
                     {
                         // some fields aren't set till after execution, so populate anything missing
-                        UpdateSpan(controllerContext, scope.Span);
+                        UpdateSpan(controllerContext, scope.Span, tracer.Settings.ServiceVersion);
                     }
 
                     return responseMessage;
@@ -124,7 +126,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                     if (scope != null)
                     {
                         // some fields aren't set till after execution, so populate anything missing
-                        UpdateSpan(controllerContext, scope.Span);
+                        UpdateSpan(controllerContext, scope.Span, tracer.Settings.ServiceVersion);
                     }
 
                     scope?.Span.SetException(ex);
@@ -133,19 +135,18 @@ namespace Datadog.Trace.ClrProfiler.Integrations
             }
         }
 
-        private static Scope CreateScope(object controllerContext)
+        private static Scope CreateScope(Tracer tracer, object controllerContext)
         {
             Scope scope = null;
 
             try
             {
-                if (!Tracer.Instance.Settings.IsIntegrationEnabled(IntegrationName))
+                if (!tracer.Settings.IsIntegrationEnabled(IntegrationName))
                 {
                     // integration disabled, don't create a scope, skip this trace
                     return null;
                 }
 
-                var tracer = Tracer.Instance;
                 var request = controllerContext.GetProperty<HttpRequestMessage>("Request").GetValueOrDefault();
                 SpanContext propagatedContext = null;
 
@@ -164,7 +165,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                 }
 
                 scope = tracer.StartActive(OperationName, propagatedContext);
-                UpdateSpan(controllerContext, scope.Span);
+                UpdateSpan(controllerContext, scope.Span, tracer.Settings.ServiceVersion);
 
                 // set analytics sample rate if enabled
                 var analyticsSampleRate = tracer.Settings.GetIntegrationAnalyticsSampleRate(IntegrationName, enabledWithGlobalSetting: true);
@@ -178,7 +179,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
             return scope;
         }
 
-        private static void UpdateSpan(dynamic controllerContext, Span span)
+        private static void UpdateSpan(dynamic controllerContext, Span span, string serviceVersion)
         {
             try
             {
@@ -233,7 +234,9 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                     resourceName: resourceName,
                     method: method,
                     host: host,
-                    httpUrl: rawUrl);
+                    httpUrl: rawUrl,
+                    serviceVersion: serviceVersion);
+
                 span.SetTag(Tags.AspNetAction, action);
                 span.SetTag(Tags.AspNetController, controller);
                 span.SetTag(Tags.AspNetRoute, route);

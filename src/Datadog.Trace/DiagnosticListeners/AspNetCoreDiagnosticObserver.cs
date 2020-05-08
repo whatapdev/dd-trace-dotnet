@@ -162,7 +162,7 @@ namespace Datadog.Trace.DiagnosticListeners
                 Span span = _tracer.StartSpan(HttpRequestInOperationName, propagatedContext)
                                    .SetTag(Tags.InstrumentationName, ComponentName);
 
-                span.DecorateWebServerSpan(resourceName, httpMethod, host, url);
+                span.DecorateWebServerSpan(resourceName, httpMethod, host, url, _tracer.Settings.ServiceVersion);
 
                 // set analytics sample rate if enabled
                 var analyticsSampleRate = _tracer.Settings.GetIntegrationAnalyticsSampleRate(IntegrationName, enabledWithGlobalSetting: true);

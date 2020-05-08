@@ -136,7 +136,9 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                     resourceName: resourceName,
                     method: httpMethod,
                     host: host,
-                    httpUrl: url);
+                    httpUrl: url,
+                    tracer.Settings.ServiceVersion);
+
                 span.SetTag(Tags.AspNetRoute, route?.Url);
                 span.SetTag(Tags.AspNetController, controllerName);
                 span.SetTag(Tags.AspNetAction, actionName);
