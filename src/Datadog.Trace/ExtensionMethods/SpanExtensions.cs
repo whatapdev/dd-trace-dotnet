@@ -52,7 +52,8 @@ namespace Datadog.Trace.ExtensionMethods
             string resourceName,
             string method,
             string host,
-            string httpUrl)
+            string httpUrl,
+            string serviceVersion)
         {
             span.Type = SpanTypes.Web;
             span.ResourceName = resourceName?.Trim();
@@ -61,6 +62,7 @@ namespace Datadog.Trace.ExtensionMethods
             span.SetTag(Tags.HttpRequestHeadersHost, host);
             span.SetTag(Tags.HttpUrl, httpUrl);
             span.SetTag(Tags.Language, TracerConstants.Language);
+            span.SetTag(Tags.Version, serviceVersion);
         }
 
         private static string GetConnectionStringValue(DbConnectionStringBuilder builder, params string[] names)
